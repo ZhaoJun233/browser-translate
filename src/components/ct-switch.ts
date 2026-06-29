@@ -15,9 +15,19 @@ export class CtSwitch extends LitElement {
   @property({ type: Boolean, reflect: true }) disabled = false
 
   private onClick(): void {
-    if (this.disabled) return
+    if (this.disabled) {
+      return
+    }
     this.checked = !this.checked
     emitCtEvent(this, 'ct-change', { value: this.checked })
+  }
+
+  private onKeyDown(e: KeyboardEvent): void {
+    if (e.key !== ' ' && e.key !== 'Enter') {
+      return
+    }
+    e.preventDefault()
+    this.onClick()
   }
 
   override render() {
@@ -28,7 +38,7 @@ export class CtSwitch extends LitElement {
         aria-checked=${this.checked}
         tabindex=${this.disabled ? '-1' : '0'}
         @click=${this.onClick}
-        @keydown=${(e: KeyboardEvent) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); this.onClick() } }}
+        @keydown=${this.onKeyDown}
       >
         <div class="w-full h-full rounded-full transition-colors duration-200"
           style="background-color: ${this.checked ? '#00c4b6' : '#ccc'}"></div>

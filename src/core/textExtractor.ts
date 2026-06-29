@@ -15,7 +15,7 @@ export interface ITextNodeInfo {
 
 export interface IElementInfo {
   tagName: string
-  attrs: string
+  attrs: Record<string, string>
   textContent: string
 }
 
@@ -247,7 +247,7 @@ export class TextExtractor {
    */
   getTextWithInlineTags(
     element: HTMLElement,
-    counter = 0,
+    state: { counter: number } = { counter: 0 },
   ): [string, TCombinedTextMap] {
     let content = ''
     const map: TCombinedTextMap = new Map()
@@ -264,23 +264,18 @@ export class TextExtractor {
 
         // Preserve important inline tags and their nested content
         if (DOM_SELECTORS.INLINE_ELEMENTS.includes(tagName)) {
-          counter++
+          state.counter += 1
           const textContent = el.textContent || ''
-          const attrs = Array.from(el.attributes)
-            .map(
-              attr =>
-                `${attr.name}="${this.escapeAttributeValue(attr.value)}"`,
-            )
-            .join(' ')
-          const [innerText, _map] = this.getTextWithInlineTags(el, counter)
+          const attrs = this.getImportantAttributes(el)
+          const [innerText, _map] = this.getTextWithInlineTags(el, state)
           _map.forEach((value, key) => map.set(key, value))
-          const tag = `c${counter}`
+          const tag = `c${state.counter}`
           map.set(tag, { tagName, attrs, textContent })
           content += `<${tag}>${innerText}</${tag}>`
         }
         else {
           // For other elements, recursively process their content
-          const [innerText, _map] = this.getTextWithInlineTags(el)
+          const [innerText, _map] = this.getTextWithInlineTags(el, state)
           _map.forEach((value, key) => map.set(key, value))
           content += innerText
         }
@@ -302,12 +297,12 @@ export class TextExtractor {
         const reg = new RegExp(`<${tag}>(.*?)</${tag}>`, 'g')
         text = text.replaceAll(
           reg,
-          `<${tagName} ${attrs}>${textContent}</${tagName}>`,
+          this.createHtmlTag(tagName, attrs, textContent),
         )
       }
       else {
         text = text
-          .replaceAll(`<${tag}>`, `<${tagName} ${attrs}>`)
+          .replaceAll(`<${tag}>`, this.createHtmlOpenTag(tagName, attrs))
           .replaceAll(`</${tag}>`, `</${tagName}>`)
       }
     }
@@ -317,15 +312,15 @@ export class TextExtractor {
   /**
    * Get important attributes from an element (excluding non-display attributes)
    */
-  getImportantAttributes(element: HTMLElement) {
-    let attrs = ''
+  getImportantAttributes(element: HTMLElement): Record<string, string> {
+    const attrs: Record<string, string> = {}
 
       // 只保留影响显示的属性，排除title、alt、placeholder等非显示属性
       ;['href', 'class', 'id', 'target', 'rel'].forEach((attr) => {
       if (element.hasAttribute(attr)) {
         const value = element.getAttribute(attr)
         if (value) {
-          attrs += ` ${attr}="${this.escapeAttributeValue(value)}"`
+          attrs[attr] = value
         }
       }
     })
@@ -333,21 +328,55 @@ export class TextExtractor {
     // 只保留必要的data-*和aria-*属性
     Array.from(element.attributes).forEach((attr) => {
       if (attr.name.startsWith('data-') || attr.name.startsWith('aria-')) {
-        attrs += ` ${attr.name}="${this.escapeAttributeValue(attr.value)}"`
+        attrs[attr.name] = attr.value
       }
     })
 
     return attrs
   }
 
-  /**
-   * Escape attribute values to prevent HTML injection
-   */
-  escapeAttributeValue(value: string) {
-    if (!value) {
-      return ''
+  createHtmlOpenTag(tagName: string, attrs: Record<string, string>) {
+    const safeAttrs = Object.entries(attrs)
+      .filter(([name, value]) => this.isSafeAttribute(name, value))
+      .map(([name, value]) => ` ${name}="${this.escapeAttributeValue(value)}"`)
+      .join('')
+    return `<${tagName}${safeAttrs}>`
+  }
+
+  createHtmlTag(tagName: string, attrs: Record<string, string>, textContent: string) {
+    return `${this.createHtmlOpenTag(tagName, attrs)}${this.escapeHtml(textContent)}</${tagName}>`
+  }
+
+  private isSafeAttribute(name: string, value: string) {
+    const lowerName = name.toLowerCase()
+    if (lowerName.startsWith('on') || lowerName === 'style') {
+      return false
     }
-    return value.replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+    if (lowerName === 'href') {
+      return /^(?:https?:|mailto:|tel:|#|\/(?!\/))/i.test(value)
+    }
+    return lowerName === 'class'
+      || lowerName === 'id'
+      || lowerName === 'target'
+      || lowerName === 'rel'
+      || lowerName.startsWith('data-')
+      || lowerName.startsWith('aria-')
+  }
+
+  private escapeAttributeValue(value: string) {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+  }
+
+  private escapeHtml(value: string) {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
   }
 
   /**

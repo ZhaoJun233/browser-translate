@@ -1,9 +1,8 @@
-import { GM_getValue } from '$'
 import { css, html, LitElement, nothing } from 'lit'
 import { customElement, state } from 'lit/decorators.js'
 import { OpenAITranslator } from '../core/provider/openai'
 import { cache, translatorInstance } from '../hooks/useTranslate'
-import { STORAGE_CONFIG_KEY } from '../utils/constant'
+import { getConfig } from '../utils/config'
 import { logger } from '../utils/logger'
 import { closeIcon, languageIcon } from './icons'
 
@@ -73,7 +72,7 @@ export class ChromeTranslateSelection extends LitElement {
     if (this.phase !== 'hidden') {
       return
     }
-    const stored = GM_getValue(STORAGE_CONFIG_KEY, {}) as any
+    const stored = getConfig()
     if (stored?.selectionTranslate === false) {
       return
     }
@@ -123,7 +122,7 @@ export class ChromeTranslateSelection extends LitElement {
     window.getSelection()?.removeAllRanges()
 
     try {
-      const stored = GM_getValue(STORAGE_CONFIG_KEY, {}) as any
+      const stored = getConfig()
       const language = stored?.language
 
       if (!language?.to) {
@@ -182,8 +181,8 @@ export class ChromeTranslateSelection extends LitElement {
       this.translatedText = result
       logger.info(`Selection translate completed (${from}→${language.to})`)
     }
-    catch (e: any) {
-      const msg = typeof e === 'string' ? e : e?.message ?? ''
+    catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : typeof e === 'string' ? e : ''
       logger.error(`Selection translate failed: ${msg}`)
       if (!msg) {
         this.error = 'Translation failed. Check your provider configuration.'

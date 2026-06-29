@@ -18,9 +18,6 @@
 (function () {
   'use strict';
 
-  var _GM_getValue = (() => typeof GM_getValue != "undefined" ? GM_getValue : void 0)();
-  var _GM_setValue = (() => typeof GM_setValue != "undefined" ? GM_setValue : void 0)();
-  var _GM_xmlhttpRequest = (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
   /**
    * @license
    * Copyright 2019 Google LLC
@@ -610,6 +607,9 @@
       } });
     };
   }
+  var _GM_getValue = (() => typeof GM_getValue != "undefined" ? GM_getValue : void 0)();
+  var _GM_setValue = (() => typeof GM_setValue != "undefined" ? GM_setValue : void 0)();
+  var _GM_xmlhttpRequest = (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
   const padStart = (param) => param.toString().padStart(2, "0");
   const oneDigit = (param) => param.startsWith("0") ? param.slice(-1) : param;
   function tinyDateFormat(format = "HH:mm:ss", timestamp = Date.now()) {
@@ -1147,7 +1147,7 @@
     return true;
   }
   function parseCacheKey(key) {
-    const match = key.match(/^([a-zA-Z-]+)->([a-zA-Z-]+):(.*)$/);
+    const match = key.match(/^([a-z-]+)->([a-z-]+):(.*)$/i);
     if (!match) {
       return null;
     }
@@ -1297,6 +1297,38 @@
       this.translateElements = [];
       this.translateContainers = [];
       this.translateLoadingElements = [];
+      this.allowedHtmlTags = new Set([
+        "a",
+        "b",
+        "strong",
+        "span",
+        "em",
+        "i",
+        "u",
+        "small",
+        "sub",
+        "sup",
+        "font",
+        "mark",
+        "cite",
+        "q",
+        "abbr",
+        "time",
+        "ruby",
+        "rt",
+        "rp",
+        "bdi",
+        "bdo",
+        "br",
+        "wbr",
+        "code",
+        "kbd",
+        "samp",
+        "var",
+        "p",
+        "div"
+      ]);
+      this.allowedHtmlAttributes = new Set(["href", "class", "id", "target", "rel"]);
       this.textExtractor = options.textExtractor;
       this.translator = options.translator;
       this.translateCache = options.LFUCache;
@@ -1436,14 +1468,15 @@
       const mutationCallback = (mutations, _observer) => {
         mutations.forEach((mutation) => {
           mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              this.getGroupTextNodesByParagraph(this.el).forEach((group) => {
-                if (!groupedNodes.has(group.container)) {
-                  groupedNodes.set(group.container, group);
-                  this.observer?.observe(group.container);
-                }
-              });
+            if (!(node instanceof HTMLElement) || this.isOwnTranslationNode(node)) {
+              return;
             }
+            this.getGroupTextNodesByParagraph(node).forEach((group) => {
+              if (!groupedNodes.has(group.container)) {
+                groupedNodes.set(group.container, group);
+                this.observer?.observe(group.container);
+              }
+            });
           });
         });
       };
@@ -1595,8 +1628,7 @@
       if (textParagraph.translate?.toLocaleLowerCase() === textParagraph.combinedText?.toLocaleLowerCase()) {
         return;
       }
-      const el = document.createElement("div");
-      el.innerHTML = textParagraph.translate;
+      const el = this.createSafeHtmlFragment(textParagraph.translate);
       while (el.firstChild) {
         wrap.appendChild(el.firstChild);
       }
@@ -1612,8 +1644,7 @@
         return;
       }
       const container = textParagraph.container;
-      const el = document.createElement("div");
-      el.innerHTML = textParagraph.translate;
+      const el = this.createSafeHtmlFragment(textParagraph.translate);
       while (el.firstChild) {
         wrap.appendChild(el.firstChild);
       }
@@ -1623,7 +1654,7 @@
       const container = textParagraph.container;
       container.setAttribute(ORIGINAL_ATTR, container.innerHTML);
       if (textParagraph.translate) {
-        container.innerHTML = textParagraph.translate;
+        container.replaceChildren(this.createSafeHtmlFragment(textParagraph.translate));
       } else {
         for (const info of textParagraph.textNodes) {
           const { node, translate, originalText } = info;
@@ -1633,6 +1664,51 @@
         }
       }
       this.translateContainers.push(container);
+    }
+    isOwnTranslationNode(node) {
+      return node.classList.contains(BILINGUAL_PARAGRAPH) || node.classList.contains(BILINGUAL_CONTAINER) || !!node.closest(`.${BILINGUAL_PARAGRAPH}, .${BILINGUAL_CONTAINER}`);
+    }
+    createSafeHtmlFragment(html) {
+      const template = document.createElement("template");
+      template.innerHTML = html;
+      this.sanitizeNode(template.content);
+      return template.content;
+    }
+    sanitizeNode(root) {
+      for (const child of Array.from(root.childNodes)) {
+        if (child.nodeType === Node.COMMENT_NODE) {
+          child.remove();
+          continue;
+        }
+        if (!(child instanceof Element)) {
+          continue;
+        }
+        const tagName = child.tagName.toLowerCase();
+        if (!this.allowedHtmlTags.has(tagName)) {
+          child.replaceWith(...Array.from(child.childNodes));
+          this.sanitizeNode(root);
+          continue;
+        }
+        this.sanitizeAttributes(child);
+        this.sanitizeNode(child);
+      }
+    }
+    sanitizeAttributes(element) {
+      for (const attr of Array.from(element.attributes)) {
+        const name = attr.name.toLowerCase();
+        const value = attr.value;
+        const isAllowed = this.allowedHtmlAttributes.has(name) || name.startsWith("data-") || name.startsWith("aria-");
+        if (!isAllowed || name.startsWith("on") || name === "style") {
+          element.removeAttribute(attr.name);
+          continue;
+        }
+        if ((name === "href" || name === "src") && !this.isSafeUrl(value)) {
+          element.removeAttribute(attr.name);
+        }
+      }
+    }
+    isSafeUrl(value) {
+      return /^(?:https?:|mailto:|tel:|#|\/(?!\/))/i.test(value);
     }
   }
   class TextExtractor {
@@ -1762,7 +1838,7 @@ extractTextFromHtml(htmlContent) {
       tempDiv.innerHTML = htmlContent;
       return this.getTextWithInlineTags(tempDiv);
     }
-getTextWithInlineTags(element, counter = 0) {
+getTextWithInlineTags(element, state = { counter: 0 }) {
       let content = "";
       const map = new Map();
       for (const node of Array.from(element.childNodes)) {
@@ -1774,18 +1850,16 @@ getTextWithInlineTags(element, counter = 0) {
           const el = node;
           const tagName = el.tagName.toLowerCase();
           if (DOM_SELECTORS.INLINE_ELEMENTS.includes(tagName)) {
-            counter++;
+            state.counter += 1;
             const textContent = el.textContent || "";
-            const attrs = Array.from(el.attributes).map(
-              (attr) => `${attr.name}="${this.escapeAttributeValue(attr.value)}"`
-            ).join(" ");
-            const [innerText, _map] = this.getTextWithInlineTags(el, counter);
+            const attrs = this.getImportantAttributes(el);
+            const [innerText, _map] = this.getTextWithInlineTags(el, state);
             _map.forEach((value, key) => map.set(key, value));
-            const tag = `c${counter}`;
+            const tag = `c${state.counter}`;
             map.set(tag, { tagName, attrs, textContent });
             content += `<${tag}>${innerText}</${tag}>`;
           } else {
-            const [innerText, _map] = this.getTextWithInlineTags(el);
+            const [innerText, _map] = this.getTextWithInlineTags(el, state);
             _map.forEach((value, key) => map.set(key, value));
             content += innerText;
           }
@@ -1799,36 +1873,53 @@ parseTextWithInlineTags(text, map) {
           const reg = new RegExp(`<${tag}>(.*?)</${tag}>`, "g");
           text = text.replaceAll(
             reg,
-            `<${tagName} ${attrs}>${textContent}</${tagName}>`
+            this.createHtmlTag(tagName, attrs, textContent)
           );
         } else {
-          text = text.replaceAll(`<${tag}>`, `<${tagName} ${attrs}>`).replaceAll(`</${tag}>`, `</${tagName}>`);
+          text = text.replaceAll(`<${tag}>`, this.createHtmlOpenTag(tagName, attrs)).replaceAll(`</${tag}>`, `</${tagName}>`);
         }
       }
       return text;
     }
 getImportantAttributes(element) {
-      let attrs = "";
+      const attrs = {};
       ["href", "class", "id", "target", "rel"].forEach((attr) => {
         if (element.hasAttribute(attr)) {
           const value = element.getAttribute(attr);
           if (value) {
-            attrs += ` ${attr}="${this.escapeAttributeValue(value)}"`;
+            attrs[attr] = value;
           }
         }
       });
       Array.from(element.attributes).forEach((attr) => {
         if (attr.name.startsWith("data-") || attr.name.startsWith("aria-")) {
-          attrs += ` ${attr.name}="${this.escapeAttributeValue(attr.value)}"`;
+          attrs[attr.name] = attr.value;
         }
       });
       return attrs;
     }
-escapeAttributeValue(value) {
-      if (!value) {
-        return "";
+    createHtmlOpenTag(tagName, attrs) {
+      const safeAttrs = Object.entries(attrs).filter(([name, value]) => this.isSafeAttribute(name, value)).map(([name, value]) => ` ${name}="${this.escapeAttributeValue(value)}"`).join("");
+      return `<${tagName}${safeAttrs}>`;
+    }
+    createHtmlTag(tagName, attrs, textContent) {
+      return `${this.createHtmlOpenTag(tagName, attrs)}${this.escapeHtml(textContent)}</${tagName}>`;
+    }
+    isSafeAttribute(name, value) {
+      const lowerName = name.toLowerCase();
+      if (lowerName.startsWith("on") || lowerName === "style") {
+        return false;
       }
-      return value.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+      if (lowerName === "href") {
+        return /^(?:https?:|mailto:|tel:|#|\/(?!\/))/i.test(value);
+      }
+      return lowerName === "class" || lowerName === "id" || lowerName === "target" || lowerName === "rel" || lowerName.startsWith("data-") || lowerName.startsWith("aria-");
+    }
+    escapeAttributeValue(value) {
+      return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+    escapeHtml(value) {
+      return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 getElementId(element) {
       if (element.id) {
@@ -2253,6 +2344,52 @@ info() {
     return function stopWatching() {
       clearInterval(timer);
     };
+  }
+  const DEFAULT_CONFIG = {
+    position: { x: "", y: "" },
+    side: "right",
+    language: { from: "auto", to: "" },
+    provider: "chrome",
+    mode: "text",
+    displayMode: "bilingual",
+    selectionTranslate: true,
+    batchSize: 6,
+    openai: {
+      apiKey: "",
+      baseUrl: "https://api.openai.com/v1",
+      model: "gpt-4o-mini",
+      prompt: "You are a professional translator. Translate the following text from {from} to {to}. Return only the translated text, no explanation, no notes. The text contains critical markup tags like <c1>, <c2>, <c3> etc. Each tag's opening <cN> and closing </cN> wrap a single contiguous text span. You MUST preserve ALL of these tags exactly as-is, in the exact same order and position, and keep each tag's content as one continuous segment. Never split a tag's inner content across different parts of the sentence. Never remove, merge, reorder, or restructure any of these tags in any circumstance.",
+      temperature: 0.3,
+      maxTokens: 1024
+    }
+  };
+  function normalizeConfig(config = {}) {
+    return {
+      ...DEFAULT_CONFIG,
+      ...config,
+      position: { ...DEFAULT_CONFIG.position, ...config.position },
+      language: { ...DEFAULT_CONFIG.language, ...config.language },
+      openai: { ...DEFAULT_CONFIG.openai, ...config.openai }
+    };
+  }
+  function getConfig() {
+    return normalizeConfig(_GM_getValue(STORAGE_CONFIG_KEY, DEFAULT_CONFIG));
+  }
+  function saveConfig(config) {
+    const normalized = normalizeConfig(config);
+    _GM_setValue(STORAGE_CONFIG_KEY, normalized);
+    return normalized;
+  }
+  function patchConfig(current, patch) {
+    const next = normalizeConfig({
+      ...current,
+      ...patch,
+      position: { ...current.position, ...patch.position },
+      language: { ...current.language, ...patch.language },
+      openai: { ...current.openai, ...patch.openai }
+    });
+    _GM_setValue(STORAGE_CONFIG_KEY, next);
+    return next;
   }
   function emitCtEvent(host, name, detail) {
     host.dispatchEvent(new CustomEvent(name, {
@@ -3228,9 +3365,18 @@ info() {
       this.disabled = false;
     }
     onClick() {
-      if (this.disabled) return;
+      if (this.disabled) {
+        return;
+      }
       this.checked = !this.checked;
       emitCtEvent(this, "ct-change", { value: this.checked });
+    }
+    onKeyDown(e2) {
+      if (e2.key !== " " && e2.key !== "Enter") {
+        return;
+      }
+      e2.preventDefault();
+      this.onClick();
     }
     render() {
       return x`
@@ -3240,12 +3386,7 @@ info() {
         aria-checked=${this.checked}
         tabindex=${this.disabled ? "-1" : "0"}
         @click=${this.onClick}
-        @keydown=${(e2) => {
-      if (e2.key === " " || e2.key === "Enter") {
-        e2.preventDefault();
-        this.onClick();
-      }
-    }}
+        @keydown=${this.onKeyDown}
       >
         <div class="w-full h-full rounded-full transition-colors duration-200"
           style="background-color: ${this.checked ? "#00c4b6" : "#ccc"}"></div>
@@ -4191,24 +4332,6 @@ info() {
     if (kind && result) __defProp$1(target, key, result);
     return result;
   };
-  const DEFAULT_CONFIG = {
-    position: { x: "", y: "" },
-    side: "right",
-    language: { from: "auto", to: "" },
-    provider: "chrome",
-    mode: "text",
-    displayMode: "bilingual",
-    selectionTranslate: true,
-    batchSize: 6,
-    openai: {
-      apiKey: "",
-      baseUrl: "https://api.openai.com/v1",
-      model: "gpt-4o-mini",
-      prompt: "You are a professional translator. Translate the following text from {from} to {to}. Return only the translated text, no explanation, no notes. The text contains critical markup tags like <c1>, <c2>, <c3> etc. Each tag's opening <cN> and closing </cN> wrap a single contiguous text span. You MUST preserve ALL of these tags exactly as-is, in the exact same order and position, and keep each tag's content as one continuous segment. Never split a tag's inner content across different parts of the sentence. Never remove, merge, reorder, or restructure any of these tags in any circumstance.",
-      temperature: 0.3,
-      maxTokens: 1024
-    }
-  };
   let ChromeTranslateBall = class extends i {
     constructor() {
       super(...arguments);
@@ -4228,7 +4351,7 @@ info() {
       this.selectionTranslate = DEFAULT_CONFIG.selectionTranslate;
       this.openaiTemperature = DEFAULT_CONFIG.openai.temperature;
       this.openaiMaxTokens = DEFAULT_CONFIG.openai.maxTokens;
-      this.config = _GM_getValue(STORAGE_CONFIG_KEY, DEFAULT_CONFIG);
+      this.config = getConfig();
       this.openaiProvider = new OpenAITranslator();
       this.dragging = false;
       this.isAllowedTranslate = true;
@@ -4265,11 +4388,7 @@ info() {
         const x2 = ball.style.getPropertyValue("--x");
         const y3 = ball.style.getPropertyValue("--y");
         ball.style.removeProperty("--x");
-        _GM_setValue(STORAGE_CONFIG_KEY, {
-          ...this.config,
-          position: { x: x2, y: y3 },
-          side
-        });
+        this.saveConfig({ position: { x: x2, y: y3 }, side });
       };
       this.onTranslate = debounce(async () => {
         if (!this.isAllowedTranslate) {
@@ -4310,12 +4429,7 @@ info() {
     }
     connectedCallback() {
       super.connectedCallback();
-      this.config = {
-        ...DEFAULT_CONFIG,
-        ...this.config,
-        language: { ...DEFAULT_CONFIG.language, ...this.config.language },
-        openai: { ...DEFAULT_CONFIG.openai, ...this.config.openai }
-      };
+      this.config = getConfig();
       this.language = { ...this.config.language };
       this.provider = this.config.provider;
       this.mode = this.config.mode;
@@ -4359,6 +4473,10 @@ info() {
     setScrollbarProperty(el) {
       el.style.setProperty("--scrollbar-width", `${SCROLLBAR_INFO.width}px`);
       el.style.setProperty("--scrollbar-height", `${SCROLLBAR_INFO.height}px`);
+    }
+    saveConfig(patch) {
+      this.config = patchConfig(this.config, patch);
+      return this.config;
     }
     async initTranslate() {
       const options = { ...this.config.language };
@@ -4443,18 +4561,12 @@ info() {
       const from = target === "from" ? value === "auto" ? await detectPageLanguage() : value : this.language.from === "auto" ? await detectPageLanguage() : this.language.from;
       const to = target === "to" ? value : this.language.to;
       t2.instance.setLanguage({ from, to });
-      _GM_setValue(STORAGE_CONFIG_KEY, {
-        ...this.config,
-        language: this.language
-      });
+      this.saveConfig({ language: this.language });
     }
     onProviderChange(value) {
       this.provider = value;
       this.rendererCtrl?.instance.translator.setProvider(value);
-      _GM_setValue(STORAGE_CONFIG_KEY, {
-        ...this.config,
-        provider: value
-      });
+      this.saveConfig({ provider: value });
       if (value === "openai") {
         void this.fetchModels();
       }
@@ -4475,47 +4587,32 @@ info() {
         maxTokens: this.openaiMaxTokens
       };
       this.openaiProvider.updateConfig(openai);
-      _GM_setValue(STORAGE_CONFIG_KEY, {
-        ...this.config,
-        openai
-      });
+      this.saveConfig({ openai });
     }
     onModeChange(value) {
       this.mode = value;
       if (this.rendererCtrl) {
         this.rendererCtrl.instance.useHTML = value === "html";
       }
-      _GM_setValue(STORAGE_CONFIG_KEY, {
-        ...this.config,
-        mode: value
-      });
+      this.saveConfig({ mode: value });
     }
     onDisplayModeChange(value) {
       this.displayMode = value;
       if (this.rendererCtrl) {
         this.rendererCtrl.instance.mode = value;
       }
-      _GM_setValue(STORAGE_CONFIG_KEY, {
-        ...this.config,
-        displayMode: value
-      });
+      this.saveConfig({ displayMode: value });
     }
     onBatchSizeChange(value) {
       this.batchSize = value;
       if (this.rendererCtrl) {
         this.rendererCtrl.instance.batchSize = value;
       }
-      _GM_setValue(STORAGE_CONFIG_KEY, {
-        ...this.config,
-        batchSize: value
-      });
+      this.saveConfig({ batchSize: value });
     }
     onSelectionTranslateChange(value) {
       this.selectionTranslate = value;
-      _GM_setValue(STORAGE_CONFIG_KEY, {
-        ...this.config,
-        selectionTranslate: value
-      });
+      this.saveConfig({ selectionTranslate: value });
     }
     async resetToDefault() {
       const confirmed = await CtConfirm.show({
@@ -4528,12 +4625,7 @@ info() {
       if (!confirmed) {
         return;
       }
-      _GM_setValue(STORAGE_CONFIG_KEY, structuredClone(DEFAULT_CONFIG));
-      this.config = {
-        ...DEFAULT_CONFIG,
-        language: { ...DEFAULT_CONFIG.language },
-        openai: { ...DEFAULT_CONFIG.openai }
-      };
+      this.config = saveConfig(structuredClone(DEFAULT_CONFIG));
       this.language = { ...DEFAULT_CONFIG.language };
       this.provider = DEFAULT_CONFIG.provider;
       this.mode = DEFAULT_CONFIG.mode;
@@ -4844,7 +4936,7 @@ info() {
         if (this.phase !== "hidden") {
           return;
         }
-        const stored = _GM_getValue(STORAGE_CONFIG_KEY, {});
+        const stored = getConfig();
         if (stored?.selectionTranslate === false) {
           return;
         }
@@ -4907,7 +4999,7 @@ info() {
       this.phase = "popup";
       window.getSelection()?.removeAllRanges();
       try {
-        const stored = _GM_getValue(STORAGE_CONFIG_KEY, {});
+        const stored = getConfig();
         const language = stored?.language;
         if (!language?.to) {
           logger.info("Selection translate skipped (no target language configured)");
@@ -4955,7 +5047,7 @@ info() {
         this.translatedText = result;
         logger.info(`Selection translate completed (${from}→${language.to})`);
       } catch (e22) {
-        const msg = typeof e22 === "string" ? e22 : e22?.message ?? "";
+        const msg = e22 instanceof Error ? e22.message : typeof e22 === "string" ? e22 : "";
         logger.error(`Selection translate failed: ${msg}`);
         if (!msg) {
           this.error = "Translation failed. Check your provider configuration.";

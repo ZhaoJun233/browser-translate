@@ -275,7 +275,7 @@ export interface ParsedCacheKey {
 }
 
 export function parseCacheKey(key: string): ParsedCacheKey | null {
-  const match = key.match(/^([a-zA-Z-]+)->([a-zA-Z-]+):(.*)$/)
+  const match = key.match(/^([a-z-]+)->([a-z-]+):(.*)$/i)
   if (!match) {
     return null
   }

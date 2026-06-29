@@ -35,6 +35,40 @@ export class Renderer {
   translateElements: HTMLElement[] = []
   translateContainers: HTMLElement[] = []
   translateLoadingElements: HTMLElement[] = []
+  private readonly allowedHtmlTags = new Set([
+    'a',
+    'b',
+    'strong',
+    'span',
+    'em',
+    'i',
+    'u',
+    'small',
+    'sub',
+    'sup',
+    'font',
+    'mark',
+    'cite',
+    'q',
+    'abbr',
+    'time',
+    'ruby',
+    'rt',
+    'rp',
+    'bdi',
+    'bdo',
+    'br',
+    'wbr',
+    'code',
+    'kbd',
+    'samp',
+    'var',
+    'p',
+    'div',
+  ])
+
+  private readonly allowedHtmlAttributes = new Set(['href', 'class', 'id', 'target', 'rel'])
+
   constructor(options: IRendererOptions) {
     this.textExtractor = options.textExtractor
     this.translator = options.translator
@@ -191,14 +225,15 @@ export class Renderer {
     const mutationCallback: MutationCallback = (mutations, _observer) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            this.getGroupTextNodesByParagraph(this.el).forEach((group) => {
-              if (!groupedNodes.has(group.container)) {
-                groupedNodes.set(group.container, group)
-                this.observer?.observe(group.container)
-              }
-            })
+          if (!(node instanceof HTMLElement) || this.isOwnTranslationNode(node)) {
+            return
           }
+          this.getGroupTextNodesByParagraph(node).forEach((group) => {
+            if (!groupedNodes.has(group.container)) {
+              groupedNodes.set(group.container, group)
+              this.observer?.observe(group.container)
+            }
+          })
         })
       })
     }
@@ -393,8 +428,7 @@ export class Renderer {
       return
     }
 
-    const el = document.createElement('div')
-    el.innerHTML = textParagraph.translate
+    const el = this.createSafeHtmlFragment(textParagraph.translate)
     while (el.firstChild) {
       wrap.appendChild(el.firstChild)
     }
@@ -415,8 +449,7 @@ export class Renderer {
     }
 
     const container = textParagraph.container
-    const el = document.createElement('div')
-    el.innerHTML = textParagraph.translate
+    const el = this.createSafeHtmlFragment(textParagraph.translate)
 
     while (el.firstChild) {
       wrap.appendChild(el.firstChild)
@@ -430,7 +463,7 @@ export class Renderer {
     container.setAttribute(ORIGINAL_ATTR, container.innerHTML)
 
     if (textParagraph.translate) {
-      container.innerHTML = textParagraph.translate
+      container.replaceChildren(this.createSafeHtmlFragment(textParagraph.translate))
     }
     else {
       for (const info of textParagraph.textNodes) {
@@ -442,5 +475,64 @@ export class Renderer {
     }
 
     this.translateContainers.push(container)
+  }
+
+  private isOwnTranslationNode(node: HTMLElement): boolean {
+    return node.classList.contains(BILINGUAL_PARAGRAPH)
+      || node.classList.contains(BILINGUAL_CONTAINER)
+      || !!node.closest(`.${BILINGUAL_PARAGRAPH}, .${BILINGUAL_CONTAINER}`)
+  }
+
+  private createSafeHtmlFragment(html: string): DocumentFragment {
+    const template = document.createElement('template')
+    template.innerHTML = html
+    this.sanitizeNode(template.content)
+    return template.content
+  }
+
+  private sanitizeNode(root: ParentNode): void {
+    for (const child of Array.from(root.childNodes)) {
+      if (child.nodeType === Node.COMMENT_NODE) {
+        child.remove()
+        continue
+      }
+
+      if (!(child instanceof Element)) {
+        continue
+      }
+
+      const tagName = child.tagName.toLowerCase()
+      if (!this.allowedHtmlTags.has(tagName)) {
+        child.replaceWith(...Array.from(child.childNodes))
+        this.sanitizeNode(root)
+        continue
+      }
+
+      this.sanitizeAttributes(child)
+      this.sanitizeNode(child)
+    }
+  }
+
+  private sanitizeAttributes(element: Element): void {
+    for (const attr of Array.from(element.attributes)) {
+      const name = attr.name.toLowerCase()
+      const value = attr.value
+      const isAllowed = this.allowedHtmlAttributes.has(name)
+        || name.startsWith('data-')
+        || name.startsWith('aria-')
+
+      if (!isAllowed || name.startsWith('on') || name === 'style') {
+        element.removeAttribute(attr.name)
+        continue
+      }
+
+      if ((name === 'href' || name === 'src') && !this.isSafeUrl(value)) {
+        element.removeAttribute(attr.name)
+      }
+    }
+  }
+
+  private isSafeUrl(value: string): boolean {
+    return /^(?:https?:|mailto:|tel:|#|\/(?!\/))/i.test(value)
   }
 }

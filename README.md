@@ -1,47 +1,75 @@
-# Chrome Translate
+# Browser Translate
 
-An immersive bilingual translation Chrome extension powered by the **Translator API** and **Language Detector API** introduced in Chrome v138.
+Browser Translate is a Tampermonkey userscript for immersive bilingual page translation in Chrome. It injects a small floating button into pages, translates visible text on demand, and can show the translated text inline without replacing the original content.
 
-This extension adds a floating button to every webpage. With one click, it extracts visible text nodes, translates them into a bilingual format (original text + translation), and displays them inline. Clicking the button again removes all translated nodes, restoring the page to its original state.
+This project is based on [`lete114/chrome-translate`](https://github.com/lete114/chrome-translate) and keeps the original local Chrome AI translation flow while adding TypeScript refactors around configuration storage, safer HTML rendering, and build verification.
 
-> Translation node extraction reference: [sxueck/open-translate/src/core/textExtractor.js](https://github.com/sxueck/open-translate/blob/925aa5ec14416cde8c6ffa98aab3ecfc33b04e81/src/core/textExtractor.js) and further modified based on this reference.
+## Features
 
-## ✨ Features
+- Bilingual page translation with original text preserved.
+- Optional replace mode for showing translated content in place.
+- Text selection translation popup.
+- Chrome built-in Translator API and Language Detector API support.
+- Optional OpenAI-compatible provider for custom API endpoints.
+- LFU translation cache with cache inspection and editing in settings.
+- Safer HTML mode that sanitizes translated fragments before inserting them into the page.
 
-1. **Bilingual Translation**
+## Requirements
 
-   * Displays translations without replacing the original text
-   * Supports both plain text and HTML translation
+- Chrome 138 or later.
+- A userscript manager such as [Tampermonkey](https://www.tampermonkey.net/).
+- Chrome AI language packs may be downloaded by Chrome on first use.
 
-2. **Local AI-Powered Translation**
+## Install
 
-   * Uses Chrome’s built-in AI for translation
-   * Fast, private, and secure—no external servers required
+1. Install Tampermonkey in Chrome.
+2. Open the userscript file:
+   [browser-translate.user.js](https://raw.githubusercontent.com/ZhaoJun233/browser-translate/refs/heads/main/dist/chrome-translate.user.js)
+3. Confirm installation in Tampermonkey.
+4. Refresh the page you want to translate, then click the floating translate button.
 
-3. **LFU Caching for Performance**
+## Usage
 
-   * Implements a **Least Frequently Used (LFU)** cache strategy
-   * Greatly reduces repeated translations
-   * Improves speed and minimizes performance overhead
+- Click the floating button to start bilingual translation.
+- Click it again to stop and remove injected translations.
+- Open the settings button beside the floating control to change language, provider, display mode, HTML/text mode, batch size, cache, and logs.
+- Select text on a page to show the quick translation button when selection translation is enabled.
 
-## 🚀 How It Works
+## Privacy Notes
 
-1. A floating button is injected into every webpage.
-2. On click, the extension collects all translatable text nodes.
-3. Text is translated locally using Chrome’s AI model.
-4. The translated result is shown inline, beneath the original text.
-5. Clicking again removes all translated elements.
+The default provider is Chrome AI, which performs translation through Chrome's built-in APIs. If you switch to the OpenAI-compatible provider, selected text or page text is sent to the configured API base URL. Review the provider configuration before enabling it on sensitive pages.
 
-## 🛠️ Installation
+## Development
 
-UserScript: [lete114/chrome-translate/chrome-translate.user.js](https://raw.githubusercontent.com/lete114/chrome-translate/refs/heads/main/dist/chrome-translate.user.js)
+```bash
+pnpm install
+pnpm lint
+pnpm build
+```
 
-## 📌 Notes
+The built userscript is written to:
 
-* Requires Chrome v138 or later.
-* Translation happens entirely on-device; no data is sent to external servers.
+```text
+dist/chrome-translate.user.js
+```
 
-## 📖 Related Documentation
+## Project Structure
 
-* [Chrome Translator API](https://developer.chrome.com/docs/ai/translator-api)
-* [Chrome Language Detector API](https://developer.chrome.com/docs/ai/language-detection)
+- `src/core/renderer.ts` - page rendering, queueing, DOM observation, and safe HTML insertion.
+- `src/core/textExtractor.ts` - text node extraction and inline tag placeholder handling.
+- `src/components/ct-ball.ts` - floating translate control and settings integration.
+- `src/components/ct-selection.ts` - selected-text translation popup.
+- `src/utils/config.ts` - typed configuration defaults, normalization, and persistence.
+
+## Validation
+
+The current build has been verified with:
+
+```bash
+pnpm lint
+pnpm build
+```
+
+## License
+
+MIT. See [LICENSE.md](LICENSE.md).

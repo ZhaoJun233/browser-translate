@@ -1,58 +1,21 @@
 import type { ITranslateOptions } from '../core/translator'
+import type { ChromeTranslateConfig } from '../utils/config'
 import type { Mode } from '../utils/constant'
 import type { LFUCache } from '../utils/LFUCache'
 import type { ChromeTranslateSettings } from './ct-settings'
-import { GM_getValue, GM_setValue } from '$'
 import { css, html, LitElement, nothing } from 'lit'
 import { customElement, query, state } from 'lit/decorators.js'
 import { OpenAITranslator } from '../core/provider/openai'
 import { useTranslate } from '../hooks/useTranslate'
 import { useWatchUrlChange } from '../hooks/useWatchUrlChange'
-import { SCROLLBAR_INFO, STORAGE_CONFIG_KEY } from '../utils/constant'
+import { DEFAULT_CONFIG, getConfig, patchConfig, saveConfig } from '../utils/config'
+import { SCROLLBAR_INFO } from '../utils/constant'
 import { logger } from '../utils/logger'
 import { clamp, debounce, throttle, watchScrollbarChange } from '../utils/public'
 import { CtConfirm } from './ct-confirm'
 import { checkIcon, languageIcon, settingIcon } from './icons'
 import './ct-button'
 import './ct-settings'
-
-interface Config {
-  position: { x: string, y: string }
-  side: 'left' | 'right'
-  language: { from: string, to: string }
-  provider: 'chrome' | 'openai'
-  mode: 'text' | 'html'
-  displayMode: Mode
-  selectionTranslate: boolean
-  batchSize: number
-  openai: {
-    apiKey: string
-    baseUrl: string
-    model: string
-    prompt: string
-    temperature: number
-    maxTokens: number
-  }
-}
-
-const DEFAULT_CONFIG: Config = {
-  position: { x: '', y: '' },
-  side: 'right',
-  language: { from: 'auto', to: '' },
-  provider: 'chrome',
-  mode: 'text',
-  displayMode: 'bilingual',
-  selectionTranslate: true,
-  batchSize: 6,
-  openai: {
-    apiKey: '',
-    baseUrl: 'https://api.openai.com/v1',
-    model: 'gpt-4o-mini',
-    prompt: 'You are a professional translator. Translate the following text from {from} to {to}. Return only the translated text, no explanation, no notes. The text contains critical markup tags like <c1>, <c2>, <c3> etc. Each tag\'s opening <cN> and closing </cN> wrap a single contiguous text span. You MUST preserve ALL of these tags exactly as-is, in the exact same order and position, and keep each tag\'s content as one continuous segment. Never split a tag\'s inner content across different parts of the sentence. Never remove, merge, reorder, or restructure any of these tags in any circumstance.',
-    temperature: 0.3,
-    maxTokens: 1024,
-  },
-}
 
 @customElement('chrome-translate-ball')
 export class ChromeTranslateBall extends LitElement {
@@ -131,7 +94,7 @@ export class ChromeTranslateBall extends LitElement {
   @query('.ct-ball') private ballEl!: HTMLElement
   @query('chrome-translate-settings') private settingsDialog!: ChromeTranslateSettings
 
-  private config = GM_getValue<Config>(STORAGE_CONFIG_KEY, DEFAULT_CONFIG)
+  private config = getConfig()
   private openaiProvider = new OpenAITranslator()
 
   private rendererCtrl?: Awaited<ReturnType<typeof useTranslate>>
@@ -145,12 +108,7 @@ export class ChromeTranslateBall extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback()
-    this.config = {
-      ...DEFAULT_CONFIG,
-      ...this.config,
-      language: { ...DEFAULT_CONFIG.language, ...this.config.language },
-      openai: { ...DEFAULT_CONFIG.openai, ...this.config.openai },
-    }
+    this.config = getConfig()
     this.language = { ...this.config.language }
     this.provider = this.config.provider
     this.mode = this.config.mode
@@ -199,6 +157,11 @@ export class ChromeTranslateBall extends LitElement {
   private setScrollbarProperty(el: HTMLElement): void {
     el.style.setProperty('--scrollbar-width', `${SCROLLBAR_INFO.width}px`)
     el.style.setProperty('--scrollbar-height', `${SCROLLBAR_INFO.height}px`)
+  }
+
+  private saveConfig(patch: Parameters<typeof patchConfig>[1]): ChromeTranslateConfig {
+    this.config = patchConfig(this.config, patch)
+    return this.config
   }
 
   private async initTranslate(): Promise<void> {
@@ -305,11 +268,7 @@ export class ChromeTranslateBall extends LitElement {
     const y = ball.style.getPropertyValue('--y')
     ball.style.removeProperty('--x')
 
-    GM_setValue(STORAGE_CONFIG_KEY, {
-      ...this.config,
-      position: { x, y },
-      side,
-    })
+    this.saveConfig({ position: { x, y }, side })
   }
 
   private onTranslate = debounce(async () => {
@@ -391,19 +350,13 @@ export class ChromeTranslateBall extends LitElement {
     const to = target === 'to' ? value : this.language.to
 
     t.instance.setLanguage({ from, to })
-    GM_setValue(STORAGE_CONFIG_KEY, {
-      ...this.config,
-      language: this.language,
-    })
+    this.saveConfig({ language: this.language })
   }
 
   private onProviderChange(value: 'chrome' | 'openai'): void {
     this.provider = value
     this.rendererCtrl?.instance.translator.setProvider(value)
-    GM_setValue(STORAGE_CONFIG_KEY, {
-      ...this.config,
-      provider: value,
-    })
+    this.saveConfig({ provider: value })
     if (value === 'openai') {
       void this.fetchModels()
     }
@@ -426,10 +379,7 @@ export class ChromeTranslateBall extends LitElement {
       maxTokens: this.openaiMaxTokens,
     }
     this.openaiProvider.updateConfig(openai)
-    GM_setValue(STORAGE_CONFIG_KEY, {
-      ...this.config,
-      openai,
-    })
+    this.saveConfig({ openai })
   }
 
   private onModeChange(value: 'text' | 'html'): void {
@@ -437,10 +387,7 @@ export class ChromeTranslateBall extends LitElement {
     if (this.rendererCtrl) {
       this.rendererCtrl.instance.useHTML = value === 'html'
     }
-    GM_setValue(STORAGE_CONFIG_KEY, {
-      ...this.config,
-      mode: value,
-    })
+    this.saveConfig({ mode: value })
   }
 
   private onDisplayModeChange(value: Mode): void {
@@ -448,10 +395,7 @@ export class ChromeTranslateBall extends LitElement {
     if (this.rendererCtrl) {
       this.rendererCtrl.instance.mode = value
     }
-    GM_setValue(STORAGE_CONFIG_KEY, {
-      ...this.config,
-      displayMode: value,
-    })
+    this.saveConfig({ displayMode: value })
   }
 
   private onBatchSizeChange(value: number): void {
@@ -459,18 +403,12 @@ export class ChromeTranslateBall extends LitElement {
     if (this.rendererCtrl) {
       this.rendererCtrl.instance.batchSize = value
     }
-    GM_setValue(STORAGE_CONFIG_KEY, {
-      ...this.config,
-      batchSize: value,
-    })
+    this.saveConfig({ batchSize: value })
   }
 
   private onSelectionTranslateChange(value: boolean): void {
     this.selectionTranslate = value
-    GM_setValue(STORAGE_CONFIG_KEY, {
-      ...this.config,
-      selectionTranslate: value,
-    })
+    this.saveConfig({ selectionTranslate: value })
   }
 
   private async resetToDefault(): Promise<void> {
@@ -486,12 +424,7 @@ export class ChromeTranslateBall extends LitElement {
       return
     }
 
-    GM_setValue(STORAGE_CONFIG_KEY, structuredClone(DEFAULT_CONFIG))
-    this.config = {
-      ...DEFAULT_CONFIG,
-      language: { ...DEFAULT_CONFIG.language },
-      openai: { ...DEFAULT_CONFIG.openai },
-    }
+    this.config = saveConfig(structuredClone(DEFAULT_CONFIG))
 
     this.language = { ...DEFAULT_CONFIG.language }
     this.provider = DEFAULT_CONFIG.provider
