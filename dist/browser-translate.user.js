@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         browser-translate
 // @namespace    ZhaoJun233/browser-translate
-// @version      0.1.1
+// @version      0.1.2
 // @author       ZhaoJun233
 // @license      MIT
 // @icon         https://raw.githubusercontent.com/ZhaoJun233/browser-translate/main/src/assets/logo.svg
@@ -1165,7 +1165,7 @@
     }
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   }
-  const PREFIX = "ct";
+  const PREFIX = "bt";
   const STORAGE_CONFIG_KEY = `${PREFIX}-config`;
   const BILINGUAL_CONTAINER = `${PREFIX}-bilingual-container`;
   const BILINGUAL_PARAGRAPH = `${PREFIX}-bilingual-paragraph`;
@@ -4460,8 +4460,8 @@ info() {
       this.cleanupScrollbarWatch?.();
     }
     firstUpdated() {
-      const y3 = this.config.position.y;
       const ball = this.ballEl;
+      const y3 = this.getSafeInitialY();
       if (y3) {
         ball.style.setProperty("--y", y3);
       }
@@ -4472,6 +4472,20 @@ info() {
       this.setScrollbarProperty(this.ballEl);
       ball.getBoundingClientRect();
       ball.style.transition = "all 0.3s ease";
+    }
+    getSafeInitialY() {
+      const fallbackY = "calc(50vh - var(--size) / 2)";
+      const rawY = this.config.position.y.trim();
+      if (!rawY) {
+        return fallbackY;
+      }
+      const match = rawY.match(/^(-?\d+(?:\.\d+)?)px$/);
+      if (!match) {
+        return rawY;
+      }
+      const size = 40;
+      const maxY = Math.max(0, window.innerHeight - size);
+      return `${clamp(Number(match[1]), 0, maxY)}px`;
     }
     setScrollbarProperty(el) {
       el.style.setProperty("--scrollbar-width", `${SCROLLBAR_INFO.width}px`);
@@ -5249,13 +5263,20 @@ info() {
   ], ChromeTranslateSelection);
   const BALL_TAG_NAME = "browser-translate-ball";
   const SELECTION_TAG_NAME = "browser-translate-selection";
+  document.documentElement.dataset.browserTranslate = "booting";
   function appendOnce(tagName) {
     if (document.querySelector(tagName)) {
       return;
     }
     document.documentElement.appendChild(document.createElement(tagName));
   }
-  appendOnce(BALL_TAG_NAME);
-  appendOnce(SELECTION_TAG_NAME);
+  try {
+    appendOnce(BALL_TAG_NAME);
+    appendOnce(SELECTION_TAG_NAME);
+    document.documentElement.dataset.browserTranslate = "ready";
+  } catch (error) {
+    document.documentElement.dataset.browserTranslate = "error";
+    console.error("[browser-translate] failed to mount", error);
+  }
 
 })();

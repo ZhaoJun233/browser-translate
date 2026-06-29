@@ -2,7 +2,7 @@ import { getScrollbarInfo } from './public'
 
 export type Mode = 'bilingual' | 'replace'
 
-export const PREFIX = 'ct'
+export const PREFIX = 'bt'
 export const STORAGE_CONFIG_KEY = `${PREFIX}-config`
 
 export const BILINGUAL_CONTAINER = `${PREFIX}-bilingual-container`

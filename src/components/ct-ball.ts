@@ -138,8 +138,8 @@ export class ChromeTranslateBall extends LitElement {
   }
 
   override firstUpdated(): void {
-    const y = this.config.position.y
     const ball = this.ballEl
+    const y = this.getSafeInitialY()
     if (y) {
       ball.style.setProperty('--y', y)
     }
@@ -152,6 +152,23 @@ export class ChromeTranslateBall extends LitElement {
 
     ball.getBoundingClientRect()
     ball.style.transition = 'all 0.3s ease'
+  }
+
+  private getSafeInitialY(): string {
+    const fallbackY = 'calc(50vh - var(--size) / 2)'
+    const rawY = this.config.position.y.trim()
+    if (!rawY) {
+      return fallbackY
+    }
+
+    const match = rawY.match(/^(-?\d+(?:\.\d+)?)px$/)
+    if (!match) {
+      return rawY
+    }
+
+    const size = 40
+    const maxY = Math.max(0, window.innerHeight - size)
+    return `${clamp(Number(match[1]), 0, maxY)}px`
   }
 
   private setScrollbarProperty(el: HTMLElement): void {
