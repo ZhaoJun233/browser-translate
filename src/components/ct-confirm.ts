@@ -4,7 +4,7 @@ import { customElement, property, query } from 'lit/decorators.js'
 import './ct-button'
 import './ct-dialog'
 
-@customElement('ct-confirm')
+@customElement('browser-translate-confirm')
 export class CtConfirm extends LitElement {
   static override styles = css`
     :host {
@@ -21,7 +21,7 @@ export class CtConfirm extends LitElement {
   @property({ type: String }) cancelText = 'Cancel'
   @property({ type: Boolean }) danger = false
 
-  @query('ct-dialog') private dialogEl!: CtDialog
+  @query('browser-translate-dialog') private dialogEl!: CtDialog
 
   private resolve!: (value: boolean) => void
 
@@ -33,7 +33,7 @@ export class CtConfirm extends LitElement {
     danger?: boolean
   }): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
-      const el = document.createElement('ct-confirm')
+      const el = document.createElement('browser-translate-confirm')
       Object.assign(el, options)
       el.resolve = resolve
       document.body.appendChild(el)
@@ -59,7 +59,7 @@ export class CtConfirm extends LitElement {
       : ''
 
     return html`
-      <ct-dialog
+      <browser-translate-dialog
         .title=${this.title}
         width="360px"
         height="fit-content"
@@ -69,24 +69,24 @@ export class CtConfirm extends LitElement {
           ${this.message}
         </div>
         <div class="flex items-center justify-end gap-8px mt-16px">
-          <ct-button
+          <browser-translate-button
             size="md" variant="outlined"
             @click=${this.onCancel}
-          >${this.cancelText}</ct-button>
-          <ct-button
+          >${this.cancelText}</browser-translate-button>
+          <browser-translate-button
             size="md"
             variant=${this.danger ? 'outlined' : 'filled'}
             style=${dangerStyle}
             @click=${this.onConfirm}
-          >${this.confirmText}</ct-button>
+          >${this.confirmText}</browser-translate-button>
         </div>
-      </ct-dialog>
+      </browser-translate-dialog>
     `
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ct-confirm': CtConfirm
+    'browser-translate-confirm': CtConfirm
   }
 }

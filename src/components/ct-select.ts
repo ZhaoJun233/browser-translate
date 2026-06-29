@@ -8,7 +8,7 @@ export interface CtSelectOption {
   disabled?: boolean
 }
 
-@customElement('ct-select')
+@customElement('browser-translate-select')
 export class CtSelect extends LitElement {
   private uid = `cs-${Math.random().toString(36).slice(2, 8)}`
   static override styles = css`
@@ -153,6 +153,6 @@ export class CtSelect extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ct-select': CtSelect
+    'browser-translate-select': CtSelect
   }
 }

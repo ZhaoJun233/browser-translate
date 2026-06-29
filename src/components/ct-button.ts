@@ -5,7 +5,7 @@ import { emitCtEvent } from '../utils/emit'
 type ButtonSize = 'sm' | 'md'
 type ButtonVariant = 'ghost' | 'outlined' | 'filled'
 
-@customElement('ct-button')
+@customElement('browser-translate-button')
 export class CtButton extends LitElement {
   static override styles = css`
     :host([size="sm"]) button { min-width: 28px; height: 28px; padding: 0 8px; font-size: 12px; border-radius: 6px; gap: 4px; }
@@ -52,6 +52,6 @@ export class CtButton extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ct-button': CtButton
+    'browser-translate-button': CtButton
   }
 }

@@ -8,7 +8,7 @@ import { closeIcon, languageIcon } from './icons'
 
 type Phase = 'hidden' | 'button' | 'popup'
 
-@customElement('chrome-translate-selection')
+@customElement('browser-translate-selection')
 export class ChromeTranslateSelection extends LitElement {
   static override styles = css`
     :host {
@@ -288,6 +288,6 @@ export class ChromeTranslateSelection extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'chrome-translate-selection': ChromeTranslateSelection
+    'browser-translate-selection': ChromeTranslateSelection
   }
 }

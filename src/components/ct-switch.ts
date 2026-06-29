@@ -2,7 +2,7 @@ import { css, html, LitElement } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { emitCtEvent } from '../utils/emit'
 
-@customElement('ct-switch')
+@customElement('browser-translate-switch')
 export class CtSwitch extends LitElement {
   static override styles = css`
     :host {
@@ -51,6 +51,6 @@ export class CtSwitch extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ct-switch': CtSwitch
+    'browser-translate-switch': CtSwitch
   }
 }

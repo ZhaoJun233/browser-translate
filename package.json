@@ -1,7 +1,7 @@
 {
   "name": "browser-translate",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "author": "ZhaoJun233",
   "contributors": [

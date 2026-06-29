@@ -3,7 +3,7 @@ import { customElement, property } from 'lit/decorators.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { emitCtEvent } from '../utils/emit'
 
-@customElement('ct-input')
+@customElement('browser-translate-input')
 export class CtInput extends LitElement {
   static override styles = css`
     :host {
@@ -62,6 +62,6 @@ export class CtInput extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ct-input': CtInput
+    'browser-translate-input': CtInput
   }
 }

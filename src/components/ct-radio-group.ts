@@ -7,7 +7,7 @@ export interface RadioOption {
   value: string
 }
 
-@customElement('ct-radio-group')
+@customElement('browser-translate-radio-group')
 export class CtRadioGroup extends LitElement {
   static override styles = css`
     :host {
@@ -54,6 +54,6 @@ export class CtRadioGroup extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ct-radio-group': CtRadioGroup
+    'browser-translate-radio-group': CtRadioGroup
   }
 }

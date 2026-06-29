@@ -1,7 +1,7 @@
 import { css, html, LitElement } from 'lit'
 import { customElement } from 'lit/decorators.js'
 
-@customElement('ct-divider')
+@customElement('browser-translate-divider')
 export class CtDivider extends LitElement {
   static override styles = css`
     :host {
@@ -18,6 +18,6 @@ export class CtDivider extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ct-divider': CtDivider
+    'browser-translate-divider': CtDivider
   }
 }

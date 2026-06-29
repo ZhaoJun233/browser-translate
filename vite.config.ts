@@ -11,13 +11,14 @@ export default defineConfig({
     monkey({
       entry: 'src/main.ts',
       userscript: {
-        icon: `${rawRepoUrl}/src/assets/logo.svg`,
-        namespace: 'ZhaoJun233/browser-translate',
-        homepageURL: `${repoUrl}#readme`,
-        supportURL: `${repoUrl}/issues`,
-        updateURL: userscriptUrl,
-        downloadURL: userscriptUrl,
-        match: ['*://*/*'],
+        'icon': `${rawRepoUrl}/src/assets/logo.svg`,
+        'namespace': 'ZhaoJun233/browser-translate',
+        'homepageURL': `${repoUrl}#readme`,
+        'supportURL': `${repoUrl}/issues`,
+        'updateURL': userscriptUrl,
+        'downloadURL': userscriptUrl,
+        'run-at': 'document-idle',
+        'match': ['*://*/*'],
       },
     }),
     UnoCSS({

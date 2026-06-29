@@ -17,7 +17,7 @@ import { checkIcon, languageIcon, settingIcon } from './icons'
 import './ct-button'
 import './ct-settings'
 
-@customElement('chrome-translate-ball')
+@customElement('browser-translate-ball')
 export class ChromeTranslateBall extends LitElement {
   static override styles = css`
     :host {
@@ -92,7 +92,7 @@ export class ChromeTranslateBall extends LitElement {
   @state() private translateCache?: LFUCache<string>
 
   @query('.ct-ball') private ballEl!: HTMLElement
-  @query('chrome-translate-settings') private settingsDialog!: ChromeTranslateSettings
+  @query('browser-translate-settings') private settingsDialog!: ChromeTranslateSettings
 
   private config = getConfig()
   private openaiProvider = new OpenAITranslator()
@@ -522,7 +522,7 @@ export class ChromeTranslateBall extends LitElement {
           </div>
         </div>
 
-        <chrome-translate-settings
+        <browser-translate-settings
           .language=${this.language}
           .provider=${this.provider}
           .mode=${this.mode}
@@ -548,7 +548,7 @@ export class ChromeTranslateBall extends LitElement {
           @openai-config-change=${this.onSettingsEvent}
           @fetch-models=${this.onSettingsEvent}
           @reset-default=${this.onSettingsEvent}
-        ></chrome-translate-settings>
+        ></browser-translate-settings>
       </div>
     `
   }

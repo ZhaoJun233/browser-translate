@@ -20,7 +20,7 @@ import './ct-section-header'
 import './ct-tabs'
 import './ct-dialog'
 
-@customElement('chrome-translate-settings')
+@customElement('browser-translate-settings')
 export class ChromeTranslateSettings extends LitElement {
   static override styles = css`
     :host {
@@ -56,7 +56,7 @@ export class ChromeTranslateSettings extends LitElement {
   @state() private logLevelFilter: 'all' | LogLevel = 'all'
   @state() private logCount = 0
 
-  @query('ct-dialog') private dialogEl!: CtDialog
+  @query('browser-translate-dialog') private dialogEl!: CtDialog
   @query('#edit-dialog') private editDialogEl!: CtDialog
 
   show(): void {
@@ -125,141 +125,141 @@ export class ChromeTranslateSettings extends LitElement {
 
   private renderTranslateTab() {
     return html`
-      <ct-section-header label="Language"></ct-section-header>
+      <browser-translate-section-header label="Language"></browser-translate-section-header>
       <div class="flex items-center gap-12px">
         <div class="flex-1">
-          <ct-select
+          <browser-translate-select
             .value=${this.language.from}
             .options=${this.fromOptions}
             @ct-change=${(e: CustomEvent) => this.emit('language-change', { target: 'from', value: e.detail.value })}
-          ></ct-select>
+          ></browser-translate-select>
         </div>
         <span class="text-#999">→</span>
         <div class="flex-1">
-          <ct-select
+          <browser-translate-select
             .value=${this.language.to}
             .options=${this.toOptions}
             @ct-change=${(e: CustomEvent) => this.emit('language-change', { target: 'to', value: e.detail.value })}
-          ></ct-select>
+          ></browser-translate-select>
         </div>
       </div>
 
-      <ct-divider class="my-16px"></ct-divider>
+      <browser-translate-divider class="my-16px"></browser-translate-divider>
 
-      <ct-section-header label="Translation Mode"></ct-section-header>
-      <ct-radio-group
+      <browser-translate-section-header label="Translation Mode"></browser-translate-section-header>
+      <browser-translate-radio-group
         direction="vertical"
         name="mode"
         .value=${this.mode}
         .options=${[{ label: 'Text', value: 'text' }, { label: 'HTML', value: 'html' }]}
         @ct-change=${(e: CustomEvent) => this.emit('mode-change', { value: e.detail.value })}
-      ></ct-radio-group>
+      ></browser-translate-radio-group>
 
-      <ct-divider class="my-16px"></ct-divider>
+      <browser-translate-divider class="my-16px"></browser-translate-divider>
 
-      <ct-section-header label="Display Mode"></ct-section-header>
-      <ct-radio-group
+      <browser-translate-section-header label="Display Mode"></browser-translate-section-header>
+      <browser-translate-radio-group
         direction="vertical"
         name="displayMode"
         .value=${this.displayMode}
         .options=${[{ label: 'Bilingual', value: 'bilingual' }, { label: 'Replace', value: 'replace' }]}
         @ct-change=${(e: CustomEvent) => this.emit('display-mode-change', { value: e.detail.value })}
-      ></ct-radio-group>
+      ></browser-translate-radio-group>
 
-      <ct-divider class="my-16px"></ct-divider>
+      <browser-translate-divider class="my-16px"></browser-translate-divider>
 
-      <ct-section-header label="Performance"></ct-section-header>
-      <ct-input
+      <browser-translate-section-header label="Performance"></browser-translate-section-header>
+      <browser-translate-input
         type="number"
         label="Max concurrent requests"
         .value=${String(this.batchSize)}
         min="1" max="20" step="1"
         @ct-change=${(e: CustomEvent) => this.emit('batch-size-change', { value: Number(e.detail.value) })}
-      ></ct-input>
+      ></browser-translate-input>
 
-      <ct-divider class="my-16px"></ct-divider>
+      <browser-translate-divider class="my-16px"></browser-translate-divider>
 
-      <ct-section-header label="Selection Translate"></ct-section-header>
+      <browser-translate-section-header label="Selection Translate"></browser-translate-section-header>
       <label class="flex items-center justify-between cursor-pointer">
         <span class="text-13px text-[#555]">Enable translation on text selection</span>
-        <ct-switch
+        <browser-translate-switch
           .checked=${this.selectionTranslate}
           @ct-change=${(e: CustomEvent) => this.emit('selection-translate-change', { value: e.detail.value })}
-        ></ct-switch>
+        ></browser-translate-switch>
       </label>
     `
   }
 
   private renderProviderTab() {
     return html`
-      <ct-section-header label="Translation Provider"></ct-section-header>
-      <ct-radio-group
+      <browser-translate-section-header label="Translation Provider"></browser-translate-section-header>
+      <browser-translate-radio-group
         direction="horizontal"
         name="provider"
         .value=${this.provider}
         .options=${[{ label: 'Chrome AI', value: 'chrome' }, { label: 'OpenAI API', value: 'openai' }]}
         @ct-change=${(e: CustomEvent) => this.emit('provider-change', { value: e.detail.value })}
-      ></ct-radio-group>
+      ></browser-translate-radio-group>
 
       ${this.provider === 'openai'
         ? html`
-        <ct-divider class="my-16px"></ct-divider>
-        <ct-section-header label="OpenAI Configuration"></ct-section-header>
+        <browser-translate-divider class="my-16px"></browser-translate-divider>
+        <browser-translate-section-header label="OpenAI Configuration"></browser-translate-section-header>
         <div class="flex flex-col gap-12px">
-          <ct-input
+          <browser-translate-input
             type="password"
             label="API Key"
             placeholder="sk-..."
             .value=${this.openaiApiKey}
             @ct-change=${(e: CustomEvent) => this.emit('openai-config-change', { field: 'apiKey', value: e.detail.value })}
-          ></ct-input>
+          ></browser-translate-input>
 
-          <ct-input
+          <browser-translate-input
             type="text"
             label="Base URL"
             .value=${this.openaiBaseUrl}
             @ct-change=${(e: CustomEvent) => this.emit('openai-config-change', { field: 'baseUrl', value: e.detail.value })}
-          ></ct-input>
+          ></browser-translate-input>
 
           <label class="flex flex-col gap-4px">
             <span class="text-12px text-[#888] font-500">Model</span>
             <div class="flex gap-6px items-start">
               <div class="flex-1 min-w-0">
-                <ct-select
+                <browser-translate-select
                   .value=${this.openaiModel}
                   .options=${this.modelOptions}
                   ?loading=${this.openaiModelsLoading}
                   error=${this.openaiModelsError}
                   placeholder=${this.openaiModelsLoading ? 'Loading models…' : 'Select a model'}
                   @ct-change=${(e: CustomEvent) => this.emit('openai-config-change', { field: 'model', value: e.detail.value })}
-                ></ct-select>
+                ></browser-translate-select>
               </div>
-              <ct-button size="md" variant="outlined" square title="Refresh models" @click=${() => this.emit('fetch-models', undefined)}>${refreshIcon}</ct-button>
+              <browser-translate-button size="md" variant="outlined" square title="Refresh models" @click=${() => this.emit('fetch-models', undefined)}>${refreshIcon}</browser-translate-button>
             </div>
           </label>
 
-          <ct-input
+          <browser-translate-input
             type="number"
             label="Temperature"
             .value=${String(this.openaiTemperature)}
             min="0" step="0.1"
             @ct-change=${(e: CustomEvent) => this.emit('openai-config-change', { field: 'temperature', value: e.detail.value })}
-          ></ct-input>
+          ></browser-translate-input>
 
-          <ct-input
+          <browser-translate-input
             type="number"
             label="Max Tokens"
             .value=${String(this.openaiMaxTokens)}
             min="0" step="1"
             @ct-change=${(e: CustomEvent) => this.emit('openai-config-change', { field: 'maxTokens', value: e.detail.value })}
-          ></ct-input>
+          ></browser-translate-input>
 
-          <ct-textarea
+          <browser-translate-textarea
             label="System Prompt"
             placeholder="Optional: custom system prompt for translation"
             .value=${this.openaiPrompt}
             @ct-change=${(e: CustomEvent) => this.emit('openai-config-change', { field: 'prompt', value: e.detail.value })}
-          ></ct-textarea>
+          ></browser-translate-textarea>
         </div>
       `
         : ''}
@@ -287,13 +287,13 @@ export class ChromeTranslateSettings extends LitElement {
       <div class="flex items-center justify-between text-12px text-[#888]">
         <span>${info.totalItems} items • ${info.usedSize} / ${info.maxSize}</span>
         <div class="flex items-center gap-8px">
-          <ct-button size="sm" variant="ghost" square title="Refresh" @click=${() => this.requestUpdate()}>↻</ct-button>
-          <ct-button size="sm" variant="ghost" square title="Clear cache" style="--ct-btn-color:#e74c3c;--ct-btn-hover-bg:#e74c3c;--ct-btn-hover-color:#fff"
+          <browser-translate-button size="sm" variant="ghost" square title="Refresh" @click=${() => this.requestUpdate()}>↻</browser-translate-button>
+          <browser-translate-button size="sm" variant="ghost" square title="Clear cache" style="--ct-btn-color:#e74c3c;--ct-btn-hover-bg:#e74c3c;--ct-btn-hover-color:#fff"
             @click=${() => {
               this.translateCache!.clear()
               this.requestUpdate()
             }}
-          >🗑</ct-button>
+          >🗑</browser-translate-button>
         </div>
       </div>
       <div class="w-full h-8px bg-[#eee] rounded-[4px] overflow-hidden my-16px">
@@ -310,7 +310,7 @@ export class ChromeTranslateSettings extends LitElement {
           .value=${this.cacheSearch}
           @input=${(e: Event) => { this.cacheSearch = (e.target as HTMLInputElement).value }}
         >
-        <ct-select
+        <browser-translate-select
           .value=${String(this.cacheLimit)}
           .options=${limitOptions}
           class="w-68px shrink-0"
@@ -318,13 +318,13 @@ export class ChromeTranslateSettings extends LitElement {
             this.cacheLimit = Number(e.detail.value)
             this.requestUpdate()
           }}
-        ></ct-select>
-        <ct-button size="sm" variant="ghost" square title="Toggle sort order"
+        ></browser-translate-select>
+        <browser-translate-button size="sm" variant="ghost" square title="Toggle sort order"
           @click=${() => {
             this.cacheOrder = this.cacheOrder === 'desc' ? 'asc' : 'desc'
             this.requestUpdate()
           }}
-        >${this.cacheOrder === 'desc' ? '↓' : '↑'}</ct-button>
+        >${this.cacheOrder === 'desc' ? '↓' : '↑'}</browser-translate-button>
       </div>
     `
 
@@ -366,7 +366,7 @@ export class ChromeTranslateSettings extends LitElement {
                   }
                 </div>
               </div>
-              ${index < arr.length - 1 ? html`<ct-divider class="mx-8px my-16px"></ct-divider>` : ''}
+              ${index < arr.length - 1 ? html`<browser-translate-divider class="mx-8px my-16px"></browser-translate-divider>` : ''}
             `
           })}
         </div>`
@@ -375,9 +375,9 @@ export class ChromeTranslateSettings extends LitElement {
     return html`
       <div class="flex flex-col h-full">
         <div class="shrink-0">
-          <ct-section-header label="Cache Management"></ct-section-header>
+          <browser-translate-section-header label="Cache Management"></browser-translate-section-header>
           ${statsHtml}
-          <ct-divider class="my-16px"></ct-divider>
+          <browser-translate-divider class="my-16px"></browser-translate-divider>
           ${searchInput}
         </div>
         <div class="flex-1 overflow-y-auto min-h-0">
@@ -390,15 +390,15 @@ export class ChromeTranslateSettings extends LitElement {
 
   private renderEditDialog() {
     return html`
-      <ct-dialog id="edit-dialog" title="Edit Cache Entry">
+      <browser-translate-dialog id="edit-dialog" title="Edit Cache Entry">
         <div slot="header-actions">
-          <ct-button size="sm" variant="ghost" square @click=${this.cancelEdit}>✕</ct-button>
+          <browser-translate-button size="sm" variant="ghost" square @click=${this.cancelEdit}>✕</browser-translate-button>
         </div>
         <div class="flex flex-col gap-16px">
           <div class="flex items-center gap-12px">
             <label class="flex-1 flex flex-col gap-4px">
               <span class="text-12px text-[#888] font-500">Source Language</span>
-              <ct-select
+              <browser-translate-select
                 .value=${this.editingItem!.from}
                 .options=${this.toOptions}
                 @ct-change=${(e: CustomEvent) => {
@@ -407,12 +407,12 @@ export class ChromeTranslateSettings extends LitElement {
                   }
                   this.requestUpdate()
                 }}
-              ></ct-select>
+              ></browser-translate-select>
             </label>
             <span class="text-[#999] mt-24px">→</span>
             <label class="flex-1 flex flex-col gap-4px">
               <span class="text-12px text-[#888] font-500">Target Language</span>
-              <ct-select
+              <browser-translate-select
                 .value=${this.editingItem!.to}
                 .options=${this.toOptions}
                 @ct-change=${(e: CustomEvent) => {
@@ -421,11 +421,11 @@ export class ChromeTranslateSettings extends LitElement {
                   }
                   this.requestUpdate()
                 }}
-              ></ct-select>
+              ></browser-translate-select>
             </label>
           </div>
 
-          <ct-textarea
+          <browser-translate-textarea
             label="Source Text"
             .value=${this.editingItem!.text}
             @ct-change=${(e: CustomEvent) => {
@@ -434,9 +434,9 @@ export class ChromeTranslateSettings extends LitElement {
               }
               this.requestUpdate()
             }}
-          ></ct-textarea>
+          ></browser-translate-textarea>
 
-          <ct-textarea
+          <browser-translate-textarea
             label="Translation"
             .value=${this.editingItem!.value}
             @ct-change=${(e: CustomEvent) => {
@@ -445,9 +445,9 @@ export class ChromeTranslateSettings extends LitElement {
               }
               this.requestUpdate()
             }}
-          ></ct-textarea>
+          ></browser-translate-textarea>
 
-          <ct-input
+          <browser-translate-input
             type="number"
             label="Frequency"
             .value=${String(this.editingItem!.freq)}
@@ -458,14 +458,14 @@ export class ChromeTranslateSettings extends LitElement {
               }
               this.requestUpdate()
             }}
-          ></ct-input>
+          ></browser-translate-input>
 
           <div class="flex items-center justify-end gap-8px mt-8px">
-            <ct-button size="md" variant="outlined" @click=${this.cancelEdit}>Cancel</ct-button>
-            <ct-button size="md" variant="filled" @click=${this.saveEdit}>Save</ct-button>
+            <browser-translate-button size="md" variant="outlined" @click=${this.cancelEdit}>Cancel</browser-translate-button>
+            <browser-translate-button size="md" variant="filled" @click=${this.saveEdit}>Save</browser-translate-button>
           </div>
         </div>
-      </ct-dialog>
+      </browser-translate-dialog>
     `
   }
 
@@ -498,25 +498,25 @@ export class ChromeTranslateSettings extends LitElement {
     return html`
       <div class="flex flex-col h-full">
         <div class="shrink-0">
-          <ct-section-header label="Operation Logs"></ct-section-header>
+          <browser-translate-section-header label="Operation Logs"></browser-translate-section-header>
           <div class="flex items-center justify-between text-12px text-[#888]">
             <span>${this.logCount} items</span>
             <div class="flex items-center gap-8px">
-              <ct-button size="sm" variant="ghost" square title="Refresh"
+              <browser-translate-button size="sm" variant="ghost" square title="Refresh"
                 @click=${() => this.requestUpdate()}
-              >↻</ct-button>
-              <ct-button size="sm" variant="ghost" square title="Clear logs"
+              >↻</browser-translate-button>
+              <browser-translate-button size="sm" variant="ghost" square title="Clear logs"
                 style="--ct-btn-color:#e74c3c;--ct-btn-hover-bg:#e74c3c;--ct-btn-hover-color:#fff"
                 @click=${() => {
                   logger.clear()
                   this.requestUpdate()
                 }}
-              >🗑</ct-button>
+              >🗑</browser-translate-button>
             </div>
           </div>
-          <ct-divider class="my-16px"></ct-divider>
+          <browser-translate-divider class="my-16px"></browser-translate-divider>
           <div class="mb-12px">
-            <ct-radio-group
+            <browser-translate-radio-group
               direction="horizontal"
               name="log-level"
               .value=${this.logLevelFilter}
@@ -525,7 +525,7 @@ export class ChromeTranslateSettings extends LitElement {
                 this.logLevelFilter = e.detail.value
                 this.requestUpdate()
               }}
-            ></ct-radio-group>
+            ></browser-translate-radio-group>
           </div>
         </div>
         <div class="flex-1 overflow-y-auto min-h-0">
@@ -562,22 +562,22 @@ export class ChromeTranslateSettings extends LitElement {
     ]
 
     return html`
-      <ct-dialog title="Setting">
+      <browser-translate-dialog title="Setting">
         <div slot="sidebar" class="flex flex-col h-full border-r-1px border-r-solid border-r-[#eee]">
-          <ct-tabs
+          <browser-translate-tabs
             class="flex-1 min-h-0"
             .tabs=${tabs}
             .active=${this.activeTab}
             @ct-change=${(e: CustomEvent) => { this.activeTab = e.detail.value }}
-          ></ct-tabs>
-          <ct-divider></ct-divider>
+          ></browser-translate-tabs>
+          <browser-translate-divider></browser-translate-divider>
           <div class="py-8px flex justify-center">
-            <ct-button size="sm" variant="outlined"
+            <browser-translate-button size="sm" variant="outlined"
               style="--ct-btn-color:#e74c3c;--ct-btn-border:#e74c3c;--ct-btn-hover-bg:#e74c3c;--ct-btn-hover-color:#fff"
               @click=${() => {
                 this.emit('reset-default', undefined)
               }}
-            >Reset Config</ct-button>
+            >Reset Config</browser-translate-button>
           </div>
         </div>
         ${this.activeTab === 'translate'
@@ -587,13 +587,13 @@ export class ChromeTranslateSettings extends LitElement {
             : this.activeTab === 'cache'
               ? this.renderCacheTab()
               : this.renderLogsTab()}
-      </ct-dialog>
+      </browser-translate-dialog>
     `
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'chrome-translate-settings': ChromeTranslateSettings
+    'browser-translate-settings': ChromeTranslateSettings
   }
 }

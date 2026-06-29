@@ -9,7 +9,7 @@ export interface TabItem {
   value: string
 }
 
-@customElement('ct-tabs')
+@customElement('browser-translate-tabs')
 export class CtTabs extends LitElement {
   static override styles = css`
     :host {
@@ -58,6 +58,6 @@ export class CtTabs extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ct-tabs': CtTabs
+    'browser-translate-tabs': CtTabs
   }
 }

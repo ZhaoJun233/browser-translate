@@ -3,7 +3,7 @@ import { customElement, property, query } from 'lit/decorators.js'
 import { emitCtEvent } from '../utils/emit'
 import './ct-button'
 
-@customElement('ct-dialog')
+@customElement('browser-translate-dialog')
 export class CtDialog extends LitElement {
   static override styles = css`
     :host {
@@ -48,7 +48,7 @@ export class CtDialog extends LitElement {
         <div class="flex items-center justify-between px-20px py-16px border-b-1px border-b-solid border-b-[#eee] text-16px font-600 text-[#333]">
           <span part="title">${this.title}</span>
           <slot name="header-actions">
-            <ct-button size="sm" variant="ghost" square @click=${() => this.dialogEl?.close()}>✕</ct-button>
+            <browser-translate-button size="sm" variant="ghost" square @click=${() => this.dialogEl?.close()}>✕</browser-translate-button>
           </slot>
         </div>
         <div class="flex flex-1 overflow-hidden">
@@ -66,6 +66,6 @@ export class CtDialog extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ct-dialog': CtDialog
+    'browser-translate-dialog': CtDialog
   }
 }

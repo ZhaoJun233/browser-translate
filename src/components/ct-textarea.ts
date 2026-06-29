@@ -3,7 +3,7 @@ import { customElement, property } from 'lit/decorators.js'
 import { ifDefined } from 'lit/directives/if-defined.js'
 import { emitCtEvent } from '../utils/emit'
 
-@customElement('ct-textarea')
+@customElement('browser-translate-textarea')
 export class CtTextarea extends LitElement {
   static override styles = css`
     :host {
@@ -60,6 +60,6 @@ export class CtTextarea extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ct-textarea': CtTextarea
+    'browser-translate-textarea': CtTextarea
   }
 }

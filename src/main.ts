@@ -1,8 +1,16 @@
 import './components/ct-ball'
 import './components/ct-selection'
 
-const ballEl = document.createElement('chrome-translate-ball')
-document.documentElement.appendChild(ballEl)
+const BALL_TAG_NAME = 'browser-translate-ball'
+const SELECTION_TAG_NAME = 'browser-translate-selection'
 
-const selectionEl = document.createElement('chrome-translate-selection')
-document.documentElement.appendChild(selectionEl)
+function appendOnce(tagName: string) {
+  if (document.querySelector(tagName)) {
+    return
+  }
+
+  document.documentElement.appendChild(document.createElement(tagName))
+}
+
+appendOnce(BALL_TAG_NAME)
+appendOnce(SELECTION_TAG_NAME)

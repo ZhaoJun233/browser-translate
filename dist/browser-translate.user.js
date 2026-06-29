@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         browser-translate
 // @namespace    ZhaoJun233/browser-translate
-// @version      0.1.0
+// @version      0.1.1
 // @author       ZhaoJun233
 // @license      MIT
 // @icon         https://raw.githubusercontent.com/ZhaoJun233/browser-translate/main/src/assets/logo.svg
@@ -15,6 +15,7 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
+// @run-at       document-idle
 // ==/UserScript==
 
 (function () {
@@ -2486,7 +2487,7 @@ info() {
     n2({ type: Boolean })
   ], CtButton.prototype, "disabled", 2);
   CtButton = __decorateClass$d([
-    t("ct-button")
+    t("browser-translate-button")
   ], CtButton);
   var __defProp$b = Object.defineProperty;
   var __getOwnPropDesc$c = Object.getOwnPropertyDescriptor;
@@ -2527,7 +2528,7 @@ info() {
         <div class="flex items-center justify-between px-20px py-16px border-b-1px border-b-solid border-b-[#eee] text-16px font-600 text-[#333]">
           <span part="title">${this.title}</span>
           <slot name="header-actions">
-            <ct-button size="sm" variant="ghost" square @click=${() => this.dialogEl?.close()}>✕</ct-button>
+            <browser-translate-button size="sm" variant="ghost" square @click=${() => this.dialogEl?.close()}>✕</browser-translate-button>
           </slot>
         </div>
         <div class="flex flex-1 overflow-hidden">
@@ -2594,7 +2595,7 @@ info() {
     e("dialog")
   ], CtDialog.prototype, "dialogEl", 2);
   CtDialog = __decorateClass$c([
-    t("ct-dialog")
+    t("browser-translate-dialog")
   ], CtDialog);
   var __defProp$a = Object.defineProperty;
   var __getOwnPropDesc$b = Object.getOwnPropertyDescriptor;
@@ -2617,7 +2618,7 @@ info() {
     }
     static show(options) {
       return new Promise((resolve) => {
-        const el = document.createElement("ct-confirm");
+        const el = document.createElement("browser-translate-confirm");
         Object.assign(el, options);
         el.resolve = resolve;
         document.body.appendChild(el);
@@ -2637,7 +2638,7 @@ info() {
     render() {
       const dangerStyle = this.danger ? "--ct-btn-color:#e74c3c;--ct-btn-border:#e74c3c;--ct-btn-hover-bg:#e74c3c;--ct-btn-hover-color:#fff" : "";
       return x`
-      <ct-dialog
+      <browser-translate-dialog
         .title=${this.title}
         width="360px"
         height="fit-content"
@@ -2647,18 +2648,18 @@ info() {
           ${this.message}
         </div>
         <div class="flex items-center justify-end gap-8px mt-16px">
-          <ct-button
+          <browser-translate-button
             size="md" variant="outlined"
             @click=${this.onCancel}
-          >${this.cancelText}</ct-button>
-          <ct-button
+          >${this.cancelText}</browser-translate-button>
+          <browser-translate-button
             size="md"
             variant=${this.danger ? "outlined" : "filled"}
             style=${dangerStyle}
             @click=${this.onConfirm}
-          >${this.confirmText}</ct-button>
+          >${this.confirmText}</browser-translate-button>
         </div>
-      </ct-dialog>
+      </browser-translate-dialog>
     `;
     }
   };
@@ -2698,10 +2699,10 @@ info() {
     n2({ type: Boolean })
   ], CtConfirm.prototype, "danger", 2);
   __decorateClass$b([
-    e("ct-dialog")
+    e("browser-translate-dialog")
   ], CtConfirm.prototype, "dialogEl", 2);
   CtConfirm = __decorateClass$b([
-    t("ct-confirm")
+    t("browser-translate-confirm")
   ], CtConfirm);
   const languageIcon = b`<svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>`;
   const checkIcon = b`<svg viewBox="0 0 1024 1024" width="10" height="10"><path fill="currentColor" d="M406.656 706.944 195.84 496.256a32 32 0 1 0-45.248 45.248l256 256 512-512a32 32 0 0 0-45.248-45.248L406.592 706.944z"/></svg>`;
@@ -2903,7 +2904,7 @@ info() {
     n2({ type: Number })
   ], CtInput.prototype, "step", 2);
   CtInput = __decorateClass$a([
-    t("ct-input")
+    t("browser-translate-input")
   ], CtInput);
   var __defProp$8 = Object.defineProperty;
   var __getOwnPropDesc$9 = Object.getOwnPropertyDescriptor;
@@ -3128,7 +3129,7 @@ info() {
     r()
   ], CtSelect.prototype, "highlightIndex", 2);
   CtSelect = __decorateClass$9([
-    t("ct-select")
+    t("browser-translate-select")
   ], CtSelect);
   var __defProp$7 = Object.defineProperty;
   var __getOwnPropDesc$8 = Object.getOwnPropertyDescriptor;
@@ -3256,7 +3257,7 @@ info() {
     n2({ type: Number })
   ], CtTextarea.prototype, "maxLength", 2);
   CtTextarea = __decorateClass$8([
-    t("ct-textarea")
+    t("browser-translate-textarea")
   ], CtTextarea);
   var __defProp$6 = Object.defineProperty;
   var __getOwnPropDesc$7 = Object.getOwnPropertyDescriptor;
@@ -3348,7 +3349,7 @@ info() {
     n2({ type: String, reflect: true })
   ], CtRadioGroup.prototype, "direction", 2);
   CtRadioGroup = __decorateClass$7([
-    t("ct-radio-group")
+    t("browser-translate-radio-group")
   ], CtRadioGroup);
   var __defProp$5 = Object.defineProperty;
   var __getOwnPropDesc$6 = Object.getOwnPropertyDescriptor;
@@ -3436,7 +3437,7 @@ info() {
     n2({ type: Boolean, reflect: true })
   ], CtSwitch.prototype, "disabled", 2);
   CtSwitch = __decorateClass$6([
-    t("ct-switch")
+    t("browser-translate-switch")
   ], CtSwitch);
   var __getOwnPropDesc$5 = Object.getOwnPropertyDescriptor;
   var __decorateClass$5 = (decorators, target, key, kind) => {
@@ -3465,7 +3466,7 @@ info() {
 .bg-\\[\\#eee\\]{--un-bg-opacity:1;background-color:rgb(238 238 238 / var(--un-bg-opacity)) /* #eee */;};
   `;
   CtDivider = __decorateClass$5([
-    t("ct-divider")
+    t("browser-translate-divider")
   ], CtDivider);
   var __defProp$4 = Object.defineProperty;
   var __getOwnPropDesc$4 = Object.getOwnPropertyDescriptor;
@@ -3505,7 +3506,7 @@ info() {
     n2({ type: String })
   ], CtSectionHeader.prototype, "label", 2);
   CtSectionHeader = __decorateClass$4([
-    t("ct-section-header")
+    t("browser-translate-section-header")
   ], CtSectionHeader);
   var __defProp$3 = Object.defineProperty;
   var __getOwnPropDesc$3 = Object.getOwnPropertyDescriptor;
@@ -3602,7 +3603,7 @@ info() {
     n2({ type: String })
   ], CtTabs.prototype, "active", 2);
   CtTabs = __decorateClass$3([
-    t("ct-tabs")
+    t("browser-translate-tabs")
   ], CtTabs);
   var __defProp$2 = Object.defineProperty;
   var __getOwnPropDesc$2 = Object.getOwnPropertyDescriptor;
@@ -3697,139 +3698,139 @@ info() {
     }
     renderTranslateTab() {
       return x`
-      <ct-section-header label="Language"></ct-section-header>
+      <browser-translate-section-header label="Language"></browser-translate-section-header>
       <div class="flex items-center gap-12px">
         <div class="flex-1">
-          <ct-select
+          <browser-translate-select
             .value=${this.language.from}
             .options=${this.fromOptions}
             @ct-change=${(e2) => this.emit("language-change", { target: "from", value: e2.detail.value })}
-          ></ct-select>
+          ></browser-translate-select>
         </div>
         <span class="text-#999">→</span>
         <div class="flex-1">
-          <ct-select
+          <browser-translate-select
             .value=${this.language.to}
             .options=${this.toOptions}
             @ct-change=${(e2) => this.emit("language-change", { target: "to", value: e2.detail.value })}
-          ></ct-select>
+          ></browser-translate-select>
         </div>
       </div>
 
-      <ct-divider class="my-16px"></ct-divider>
+      <browser-translate-divider class="my-16px"></browser-translate-divider>
 
-      <ct-section-header label="Translation Mode"></ct-section-header>
-      <ct-radio-group
+      <browser-translate-section-header label="Translation Mode"></browser-translate-section-header>
+      <browser-translate-radio-group
         direction="vertical"
         name="mode"
         .value=${this.mode}
         .options=${[{ label: "Text", value: "text" }, { label: "HTML", value: "html" }]}
         @ct-change=${(e2) => this.emit("mode-change", { value: e2.detail.value })}
-      ></ct-radio-group>
+      ></browser-translate-radio-group>
 
-      <ct-divider class="my-16px"></ct-divider>
+      <browser-translate-divider class="my-16px"></browser-translate-divider>
 
-      <ct-section-header label="Display Mode"></ct-section-header>
-      <ct-radio-group
+      <browser-translate-section-header label="Display Mode"></browser-translate-section-header>
+      <browser-translate-radio-group
         direction="vertical"
         name="displayMode"
         .value=${this.displayMode}
         .options=${[{ label: "Bilingual", value: "bilingual" }, { label: "Replace", value: "replace" }]}
         @ct-change=${(e2) => this.emit("display-mode-change", { value: e2.detail.value })}
-      ></ct-radio-group>
+      ></browser-translate-radio-group>
 
-      <ct-divider class="my-16px"></ct-divider>
+      <browser-translate-divider class="my-16px"></browser-translate-divider>
 
-      <ct-section-header label="Performance"></ct-section-header>
-      <ct-input
+      <browser-translate-section-header label="Performance"></browser-translate-section-header>
+      <browser-translate-input
         type="number"
         label="Max concurrent requests"
         .value=${String(this.batchSize)}
         min="1" max="20" step="1"
         @ct-change=${(e2) => this.emit("batch-size-change", { value: Number(e2.detail.value) })}
-      ></ct-input>
+      ></browser-translate-input>
 
-      <ct-divider class="my-16px"></ct-divider>
+      <browser-translate-divider class="my-16px"></browser-translate-divider>
 
-      <ct-section-header label="Selection Translate"></ct-section-header>
+      <browser-translate-section-header label="Selection Translate"></browser-translate-section-header>
       <label class="flex items-center justify-between cursor-pointer">
         <span class="text-13px text-[#555]">Enable translation on text selection</span>
-        <ct-switch
+        <browser-translate-switch
           .checked=${this.selectionTranslate}
           @ct-change=${(e2) => this.emit("selection-translate-change", { value: e2.detail.value })}
-        ></ct-switch>
+        ></browser-translate-switch>
       </label>
     `;
     }
     renderProviderTab() {
       return x`
-      <ct-section-header label="Translation Provider"></ct-section-header>
-      <ct-radio-group
+      <browser-translate-section-header label="Translation Provider"></browser-translate-section-header>
+      <browser-translate-radio-group
         direction="horizontal"
         name="provider"
         .value=${this.provider}
         .options=${[{ label: "Chrome AI", value: "chrome" }, { label: "OpenAI API", value: "openai" }]}
         @ct-change=${(e2) => this.emit("provider-change", { value: e2.detail.value })}
-      ></ct-radio-group>
+      ></browser-translate-radio-group>
 
       ${this.provider === "openai" ? x`
-        <ct-divider class="my-16px"></ct-divider>
-        <ct-section-header label="OpenAI Configuration"></ct-section-header>
+        <browser-translate-divider class="my-16px"></browser-translate-divider>
+        <browser-translate-section-header label="OpenAI Configuration"></browser-translate-section-header>
         <div class="flex flex-col gap-12px">
-          <ct-input
+          <browser-translate-input
             type="password"
             label="API Key"
             placeholder="sk-..."
             .value=${this.openaiApiKey}
             @ct-change=${(e2) => this.emit("openai-config-change", { field: "apiKey", value: e2.detail.value })}
-          ></ct-input>
+          ></browser-translate-input>
 
-          <ct-input
+          <browser-translate-input
             type="text"
             label="Base URL"
             .value=${this.openaiBaseUrl}
             @ct-change=${(e2) => this.emit("openai-config-change", { field: "baseUrl", value: e2.detail.value })}
-          ></ct-input>
+          ></browser-translate-input>
 
           <label class="flex flex-col gap-4px">
             <span class="text-12px text-[#888] font-500">Model</span>
             <div class="flex gap-6px items-start">
               <div class="flex-1 min-w-0">
-                <ct-select
+                <browser-translate-select
                   .value=${this.openaiModel}
                   .options=${this.modelOptions}
                   ?loading=${this.openaiModelsLoading}
                   error=${this.openaiModelsError}
                   placeholder=${this.openaiModelsLoading ? "Loading models…" : "Select a model"}
                   @ct-change=${(e2) => this.emit("openai-config-change", { field: "model", value: e2.detail.value })}
-                ></ct-select>
+                ></browser-translate-select>
               </div>
-              <ct-button size="md" variant="outlined" square title="Refresh models" @click=${() => this.emit("fetch-models", void 0)}>${refreshIcon}</ct-button>
+              <browser-translate-button size="md" variant="outlined" square title="Refresh models" @click=${() => this.emit("fetch-models", void 0)}>${refreshIcon}</browser-translate-button>
             </div>
           </label>
 
-          <ct-input
+          <browser-translate-input
             type="number"
             label="Temperature"
             .value=${String(this.openaiTemperature)}
             min="0" step="0.1"
             @ct-change=${(e2) => this.emit("openai-config-change", { field: "temperature", value: e2.detail.value })}
-          ></ct-input>
+          ></browser-translate-input>
 
-          <ct-input
+          <browser-translate-input
             type="number"
             label="Max Tokens"
             .value=${String(this.openaiMaxTokens)}
             min="0" step="1"
             @ct-change=${(e2) => this.emit("openai-config-change", { field: "maxTokens", value: e2.detail.value })}
-          ></ct-input>
+          ></browser-translate-input>
 
-          <ct-textarea
+          <browser-translate-textarea
             label="System Prompt"
             placeholder="Optional: custom system prompt for translation"
             .value=${this.openaiPrompt}
             @ct-change=${(e2) => this.emit("openai-config-change", { field: "prompt", value: e2.detail.value })}
-          ></ct-textarea>
+          ></browser-translate-textarea>
         </div>
       ` : ""}
     `;
@@ -3852,13 +3853,13 @@ info() {
       <div class="flex items-center justify-between text-12px text-[#888]">
         <span>${info.totalItems} items • ${info.usedSize} / ${info.maxSize}</span>
         <div class="flex items-center gap-8px">
-          <ct-button size="sm" variant="ghost" square title="Refresh" @click=${() => this.requestUpdate()}>↻</ct-button>
-          <ct-button size="sm" variant="ghost" square title="Clear cache" style="--ct-btn-color:#e74c3c;--ct-btn-hover-bg:#e74c3c;--ct-btn-hover-color:#fff"
+          <browser-translate-button size="sm" variant="ghost" square title="Refresh" @click=${() => this.requestUpdate()}>↻</browser-translate-button>
+          <browser-translate-button size="sm" variant="ghost" square title="Clear cache" style="--ct-btn-color:#e74c3c;--ct-btn-hover-bg:#e74c3c;--ct-btn-hover-color:#fff"
             @click=${() => {
       this.translateCache.clear();
       this.requestUpdate();
     }}
-          >🗑</ct-button>
+          >🗑</browser-translate-button>
         </div>
       </div>
       <div class="w-full h-8px bg-[#eee] rounded-[4px] overflow-hidden my-16px">
@@ -3876,7 +3877,7 @@ info() {
       this.cacheSearch = e2.target.value;
     }}
         >
-        <ct-select
+        <browser-translate-select
           .value=${String(this.cacheLimit)}
           .options=${limitOptions}
           class="w-68px shrink-0"
@@ -3884,13 +3885,13 @@ info() {
       this.cacheLimit = Number(e2.detail.value);
       this.requestUpdate();
     }}
-        ></ct-select>
-        <ct-button size="sm" variant="ghost" square title="Toggle sort order"
+        ></browser-translate-select>
+        <browser-translate-button size="sm" variant="ghost" square title="Toggle sort order"
           @click=${() => {
       this.cacheOrder = this.cacheOrder === "desc" ? "asc" : "desc";
       this.requestUpdate();
     }}
-        >${this.cacheOrder === "desc" ? "↓" : "↑"}</ct-button>
+        >${this.cacheOrder === "desc" ? "↓" : "↑"}</browser-translate-button>
       </div>
     `;
       const displayed = this.cacheOrder === "desc" ? filtered : [...filtered].reverse();
@@ -3926,16 +3927,16 @@ info() {
                     ` : x`<span>freq: ${item.freq}</span>`}
                 </div>
               </div>
-              ${index < arr.length - 1 ? x`<ct-divider class="mx-8px my-16px"></ct-divider>` : ""}
+              ${index < arr.length - 1 ? x`<browser-translate-divider class="mx-8px my-16px"></browser-translate-divider>` : ""}
             `;
     })}
         </div>` : x`<div class="text-13px text-[#888] text-center py-20px">No entries found</div>`;
       return x`
       <div class="flex flex-col h-full">
         <div class="shrink-0">
-          <ct-section-header label="Cache Management"></ct-section-header>
+          <browser-translate-section-header label="Cache Management"></browser-translate-section-header>
           ${statsHtml}
-          <ct-divider class="my-16px"></ct-divider>
+          <browser-translate-divider class="my-16px"></browser-translate-divider>
           ${searchInput}
         </div>
         <div class="flex-1 overflow-y-auto min-h-0">
@@ -3947,15 +3948,15 @@ info() {
     }
     renderEditDialog() {
       return x`
-      <ct-dialog id="edit-dialog" title="Edit Cache Entry">
+      <browser-translate-dialog id="edit-dialog" title="Edit Cache Entry">
         <div slot="header-actions">
-          <ct-button size="sm" variant="ghost" square @click=${this.cancelEdit}>✕</ct-button>
+          <browser-translate-button size="sm" variant="ghost" square @click=${this.cancelEdit}>✕</browser-translate-button>
         </div>
         <div class="flex flex-col gap-16px">
           <div class="flex items-center gap-12px">
             <label class="flex-1 flex flex-col gap-4px">
               <span class="text-12px text-[#888] font-500">Source Language</span>
-              <ct-select
+              <browser-translate-select
                 .value=${this.editingItem.from}
                 .options=${this.toOptions}
                 @ct-change=${(e2) => {
@@ -3964,12 +3965,12 @@ info() {
       }
       this.requestUpdate();
     }}
-              ></ct-select>
+              ></browser-translate-select>
             </label>
             <span class="text-[#999] mt-24px">→</span>
             <label class="flex-1 flex flex-col gap-4px">
               <span class="text-12px text-[#888] font-500">Target Language</span>
-              <ct-select
+              <browser-translate-select
                 .value=${this.editingItem.to}
                 .options=${this.toOptions}
                 @ct-change=${(e2) => {
@@ -3978,11 +3979,11 @@ info() {
       }
       this.requestUpdate();
     }}
-              ></ct-select>
+              ></browser-translate-select>
             </label>
           </div>
 
-          <ct-textarea
+          <browser-translate-textarea
             label="Source Text"
             .value=${this.editingItem.text}
             @ct-change=${(e2) => {
@@ -3991,9 +3992,9 @@ info() {
       }
       this.requestUpdate();
     }}
-          ></ct-textarea>
+          ></browser-translate-textarea>
 
-          <ct-textarea
+          <browser-translate-textarea
             label="Translation"
             .value=${this.editingItem.value}
             @ct-change=${(e2) => {
@@ -4002,9 +4003,9 @@ info() {
       }
       this.requestUpdate();
     }}
-          ></ct-textarea>
+          ></browser-translate-textarea>
 
-          <ct-input
+          <browser-translate-input
             type="number"
             label="Frequency"
             .value=${String(this.editingItem.freq)}
@@ -4015,14 +4016,14 @@ info() {
       }
       this.requestUpdate();
     }}
-          ></ct-input>
+          ></browser-translate-input>
 
           <div class="flex items-center justify-end gap-8px mt-8px">
-            <ct-button size="md" variant="outlined" @click=${this.cancelEdit}>Cancel</ct-button>
-            <ct-button size="md" variant="filled" @click=${this.saveEdit}>Save</ct-button>
+            <browser-translate-button size="md" variant="outlined" @click=${this.cancelEdit}>Cancel</browser-translate-button>
+            <browser-translate-button size="md" variant="filled" @click=${this.saveEdit}>Save</browser-translate-button>
           </div>
         </div>
-      </ct-dialog>
+      </browser-translate-dialog>
     `;
     }
     renderLogsTab() {
@@ -4048,25 +4049,25 @@ info() {
       return x`
       <div class="flex flex-col h-full">
         <div class="shrink-0">
-          <ct-section-header label="Operation Logs"></ct-section-header>
+          <browser-translate-section-header label="Operation Logs"></browser-translate-section-header>
           <div class="flex items-center justify-between text-12px text-[#888]">
             <span>${this.logCount} items</span>
             <div class="flex items-center gap-8px">
-              <ct-button size="sm" variant="ghost" square title="Refresh"
+              <browser-translate-button size="sm" variant="ghost" square title="Refresh"
                 @click=${() => this.requestUpdate()}
-              >↻</ct-button>
-              <ct-button size="sm" variant="ghost" square title="Clear logs"
+              >↻</browser-translate-button>
+              <browser-translate-button size="sm" variant="ghost" square title="Clear logs"
                 style="--ct-btn-color:#e74c3c;--ct-btn-hover-bg:#e74c3c;--ct-btn-hover-color:#fff"
                 @click=${() => {
       logger.clear();
       this.requestUpdate();
     }}
-              >🗑</ct-button>
+              >🗑</browser-translate-button>
             </div>
           </div>
-          <ct-divider class="my-16px"></ct-divider>
+          <browser-translate-divider class="my-16px"></browser-translate-divider>
           <div class="mb-12px">
-            <ct-radio-group
+            <browser-translate-radio-group
               direction="horizontal"
               name="log-level"
               .value=${this.logLevelFilter}
@@ -4075,7 +4076,7 @@ info() {
       this.logLevelFilter = e2.detail.value;
       this.requestUpdate();
     }}
-            ></ct-radio-group>
+            ></browser-translate-radio-group>
           </div>
         </div>
         <div class="flex-1 overflow-y-auto min-h-0">
@@ -4107,28 +4108,28 @@ info() {
         { icon: x`<span>📋</span>`, label: "Logs", value: "logs" }
       ];
       return x`
-      <ct-dialog title="Setting">
+      <browser-translate-dialog title="Setting">
         <div slot="sidebar" class="flex flex-col h-full border-r-1px border-r-solid border-r-[#eee]">
-          <ct-tabs
+          <browser-translate-tabs
             class="flex-1 min-h-0"
             .tabs=${tabs}
             .active=${this.activeTab}
             @ct-change=${(e2) => {
       this.activeTab = e2.detail.value;
     }}
-          ></ct-tabs>
-          <ct-divider></ct-divider>
+          ></browser-translate-tabs>
+          <browser-translate-divider></browser-translate-divider>
           <div class="py-8px flex justify-center">
-            <ct-button size="sm" variant="outlined"
+            <browser-translate-button size="sm" variant="outlined"
               style="--ct-btn-color:#e74c3c;--ct-btn-border:#e74c3c;--ct-btn-hover-bg:#e74c3c;--ct-btn-hover-color:#fff"
               @click=${() => {
       this.emit("reset-default", void 0);
     }}
-            >Reset Config</ct-button>
+            >Reset Config</browser-translate-button>
           </div>
         </div>
         ${this.activeTab === "translate" ? this.renderTranslateTab() : this.activeTab === "provider" ? this.renderProviderTab() : this.activeTab === "cache" ? this.renderCacheTab() : this.renderLogsTab()}
-      </ct-dialog>
+      </browser-translate-dialog>
     `;
     }
   };
@@ -4316,13 +4317,13 @@ info() {
     r()
   ], ChromeTranslateSettings.prototype, "logCount", 2);
   __decorateClass$2([
-    e("ct-dialog")
+    e("browser-translate-dialog")
   ], ChromeTranslateSettings.prototype, "dialogEl", 2);
   __decorateClass$2([
     e("#edit-dialog")
   ], ChromeTranslateSettings.prototype, "editDialogEl", 2);
   ChromeTranslateSettings = __decorateClass$2([
-    t("chrome-translate-settings")
+    t("browser-translate-settings")
   ], ChromeTranslateSettings);
   var __defProp$1 = Object.defineProperty;
   var __getOwnPropDesc$1 = Object.getOwnPropertyDescriptor;
@@ -4718,7 +4719,7 @@ info() {
           </div>
         </div>
 
-        <chrome-translate-settings
+        <browser-translate-settings
           .language=${this.language}
           .provider=${this.provider}
           .mode=${this.mode}
@@ -4744,7 +4745,7 @@ info() {
           @openai-config-change=${this.onSettingsEvent}
           @fetch-models=${this.onSettingsEvent}
           @reset-default=${this.onSettingsEvent}
-        ></chrome-translate-settings>
+        ></browser-translate-settings>
       </div>
     `;
     }
@@ -4895,10 +4896,10 @@ info() {
     e(".ct-ball")
   ], ChromeTranslateBall.prototype, "ballEl", 2);
   __decorateClass$1([
-    e("chrome-translate-settings")
+    e("browser-translate-settings")
   ], ChromeTranslateBall.prototype, "settingsDialog", 2);
   ChromeTranslateBall = __decorateClass$1([
-    t("chrome-translate-ball")
+    t("browser-translate-ball")
   ], ChromeTranslateBall);
   var __defProp = Object.defineProperty;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -5244,11 +5245,17 @@ info() {
     r()
   ], ChromeTranslateSelection.prototype, "posY", 2);
   ChromeTranslateSelection = __decorateClass([
-    t("chrome-translate-selection")
+    t("browser-translate-selection")
   ], ChromeTranslateSelection);
-  const ballEl = document.createElement("chrome-translate-ball");
-  document.documentElement.appendChild(ballEl);
-  const selectionEl = document.createElement("chrome-translate-selection");
-  document.documentElement.appendChild(selectionEl);
+  const BALL_TAG_NAME = "browser-translate-ball";
+  const SELECTION_TAG_NAME = "browser-translate-selection";
+  function appendOnce(tagName) {
+    if (document.querySelector(tagName)) {
+      return;
+    }
+    document.documentElement.appendChild(document.createElement(tagName));
+  }
+  appendOnce(BALL_TAG_NAME);
+  appendOnce(SELECTION_TAG_NAME);
 
 })();

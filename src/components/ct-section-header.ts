@@ -1,7 +1,7 @@
 import { css, html, LitElement } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 
-@customElement('ct-section-header')
+@customElement('browser-translate-section-header')
 export class CtSectionHeader extends LitElement {
   static override styles = css`
     :host {
@@ -20,6 +20,6 @@ export class CtSectionHeader extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ct-section-header': CtSectionHeader
+    'browser-translate-section-header': CtSectionHeader
   }
 }
