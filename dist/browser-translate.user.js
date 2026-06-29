@@ -1,14 +1,16 @@
 // ==UserScript==
-// @name         chrome-translate
-// @namespace    lete114/chrome-translate
-// @version      0.0.4
-// @author       Lete114 <me@imlete.cn>
+// @name         browser-translate
+// @namespace    ZhaoJun233/browser-translate
+// @version      0.1.0
+// @author       ZhaoJun233
 // @license      MIT
-// @icon         https://github.com/lete114/chrome-translate/blob/main/src/assets/logo.svg?raw=true
-// @homepage     https://github.com/lete114/chrome-translate#readme
-// @homepageURL  https://github.com/lete114/chrome-translate#readme
-// @source       https://github.com/lete114/chrome-translate.git
-// @supportURL   https://github.com/lete114/chrome-translate/issues
+// @icon         https://raw.githubusercontent.com/ZhaoJun233/browser-translate/main/src/assets/logo.svg
+// @homepage     https://github.com/ZhaoJun233/browser-translate#readme
+// @homepageURL  https://github.com/ZhaoJun233/browser-translate#readme
+// @source       https://github.com/ZhaoJun233/browser-translate.git
+// @supportURL   https://github.com/ZhaoJun233/browser-translate/issues
+// @downloadURL  https://raw.githubusercontent.com/ZhaoJun233/browser-translate/main/dist/browser-translate.user.js
+// @updateURL    https://raw.githubusercontent.com/ZhaoJun233/browser-translate/main/dist/browser-translate.user.js
 // @match        *://*/*
 // @grant        GM_getValue
 // @grant        GM_setValue

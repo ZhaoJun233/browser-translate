@@ -1,16 +1,19 @@
 {
-  "name": "chrome-translate",
+  "name": "browser-translate",
   "type": "module",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "private": true,
-  "author": "Lete114 <me@imlete.cn>",
+  "author": "ZhaoJun233",
+  "contributors": [
+    "Lete114 <me@imlete.cn>"
+  ],
   "license": "MIT",
-  "homepage": "https://github.com/lete114/chrome-translate#readme",
+  "homepage": "https://github.com/ZhaoJun233/browser-translate#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lete114/chrome-translate.git"
+    "url": "git+https://github.com/ZhaoJun233/browser-translate.git"
   },
-  "bugs": "https://github.com/lete114/chrome-translate/issues",
+  "bugs": "https://github.com/ZhaoJun233/browser-translate/issues",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
